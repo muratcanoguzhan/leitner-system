@@ -1,97 +1,108 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Leitner System Flashcard App
 
-# Getting Started
+A mobile app for Android and iOS that implements the Leitner System for spaced repetition learning.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## What is the Leitner System?
 
-## Step 1: Start Metro
+The Leitner System is a method of efficiently learning using flashcards, invented by the German science journalist Sebastian Leitner in the 1970s. It uses a simple principle of spaced repetition where cards are sorted into boxes representing different review intervals:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Box 1: Review daily (new and difficult cards)
+- Box 2: Review every 3 days
+- Box 3: Review weekly
+- Box 4: Review every 2 weeks
+- Box 5: Review monthly (mastered cards)
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+When reviewing, if you answer a card correctly, it moves to the next box (longer review interval). If you answer incorrectly, it returns to Box 1 for more frequent review.
 
-```sh
-# Using npm
-npm start
+## Features
 
-# OR using Yarn
-yarn start
-```
+- Create and manage flashcards with front (question) and back (answer) content
+- Automatic sorting of cards into 5 boxes based on your performance
+- Daily review system that prioritizes cards due for review
+- Detailed statistics of your learning progress
+- Clean, user-friendly interface
 
-## Step 2: Build and run your app
+## Prerequisites
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+To run this app, you need to have set up your React Native development environment:
+
+- Node.js
+- npm or yarn
+- React Native CLI
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+- JDK 11 or newer
+- Android SDK (for Android)
+
+For detailed setup instructions, visit the [React Native Setting up the development environment](https://reactnative.dev/docs/environment-setup) guide.
+
+## Installation
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/yourusername/leitner-system.git
+   cd leitner-system
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. For iOS, install pods (macOS only):
+   ```
+   cd ios && pod install && cd ..
+   ```
+
+## Running the App
 
 ### Android
 
-```sh
-# Using npm
-npm run android
+Make sure you have an Android emulator running or a device connected:
 
-# OR using Yarn
-yarn android
+```
+npx react-native run-android
 ```
 
-### iOS
+### iOS (macOS only)
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```
+npx react-native run-ios
 ```
 
-Then, and every time you update your native dependencies, run:
+## Project Structure
 
-```sh
-bundle exec pod install
+```
+src/
+├── components/        # Reusable UI components
+├── models/            # Data models
+├── navigation/        # Navigation configuration
+├── screens/           # App screens
+└── utils/             # Utility functions
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## Using the App
 
-```sh
-# Using npm
-npm run ios
+1. **Home Screen**: View summary of all your cards across the 5 boxes
+2. **Add Card**: Create new flashcards
+3. **Review**: Practice cards that are due for review
+4. **Box Details**: View and manage cards in a specific box
 
-# OR using Yarn
-yarn ios
-```
+## Development
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+The app is built with:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+- React Native
+- TypeScript
+- React Navigation
+- AsyncStorage for persistent storage
 
-## Step 3: Modify your app
+## License
 
-Now that you have successfully run the app, let's make changes!
+This project is proprietary and confidential. All rights reserved. No part of this software may be reproduced, distributed, or transmitted in any form or by any means without the prior written permission of the author.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## Acknowledgements
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- Sebastian Leitner for the spaced repetition system
+- React Native team for the framework
+- Contributors and users of this app
