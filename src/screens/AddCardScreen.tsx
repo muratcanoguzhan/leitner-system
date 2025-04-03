@@ -1,39 +1,48 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  SafeAreaView, 
-  KeyboardAvoidingView, 
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  KeyboardAvoidingView,
   Platform,
-  Alert 
+  Alert,
 } from 'react-native';
-import { Card } from '../models/Card';
-import { loadCards, saveCards } from '../utils/storage';
-import { StackNavigationProp } from '@react-navigation/stack';
+import {Card} from '../models/Card';
+import {loadCards, saveCards} from '../utils/storage';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RouteProp} from '@react-navigation/native';
+import uuid from 'react-native-uuid';
 
 type RootStackParamList = {
-  Home: undefined;
-  AddCard: undefined;
+  Home: { systemId: string };
+  AddCard: { systemId: string };
 };
 
-type AddCardScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddCard'>;
+type AddCardScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'AddCard'
+>;
 
 interface AddCardScreenProps {
   navigation: AddCardScreenNavigationProp;
+  route: RouteProp<RootStackParamList, 'AddCard'>;
 }
 
-const AddCardScreen: React.FC<AddCardScreenProps> = ({ navigation }) => {
+const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSave = async () => {
     if (front.trim() === '' || back.trim() === '') {
-      Alert.alert('Error', 'Please enter both front and back text for the card.');
+      Alert.alert(
+        'Error',
+        'Please enter both front and back text for the card.',
+      );
       return;
     }
 
@@ -45,12 +54,13 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({ navigation }) => {
 
       // Create new card - will always start in box 1
       const newCard: Card = {
-        id: Date.now().toString(),
+        id: uuid.v4().toString(),
         front: front.trim(),
         back: back.trim(),
         boxLevel: 1,
         lastReviewed: null,
-        createdAt: new Date()
+        createdAt: new Date(),
+        leitnerSystemId: route.params.systemId,
       };
 
       // Save the updated cards array
@@ -59,7 +69,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({ navigation }) => {
       // Reset form
       setFront('');
       setBack('');
-      
+
       // Show success message
       Alert.alert(
         'Success',
@@ -75,10 +85,10 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({ navigation }) => {
           },
           {
             text: 'Go to Home',
-            onPress: () => navigation.navigate('Home'),
+            onPress: () => navigation.navigate('Home', {systemId: route.params.systemId}),
           },
         ],
-        { cancelable: false }
+        {cancelable: false},
       );
     } catch (error) {
       console.error('Error saving card:', error);
@@ -91,12 +101,13 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}
-      >
+        style={styles.keyboardAvoidingView}>
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.header}>
             <Text style={styles.title}>Add New Card</Text>
-            <Text style={styles.subtitle}>New cards will be added to Box 1</Text>
+            <Text style={styles.subtitle}>
+              New cards will be added to Box 1
+            </Text>
           </View>
 
           <View style={styles.formContainer}>
@@ -129,16 +140,14 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({ navigation }) => {
             <TouchableOpacity
               style={styles.buttonCancel}
               onPress={() => navigation.goBack()}
-              disabled={isSubmitting}
-            >
+              disabled={isSubmitting}>
               <Text style={styles.buttonCancelText}>Cancel</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.buttonSave, isSubmitting && styles.buttonDisabled]}
               onPress={handleSave}
-              disabled={isSubmitting}
-            >
+              disabled={isSubmitting}>
               <Text style={styles.buttonSaveText}>
                 {isSubmitting ? 'Adding...' : 'Add Card'}
               </Text>
@@ -238,4 +247,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddCardScreen; 
+export default AddCardScreen;

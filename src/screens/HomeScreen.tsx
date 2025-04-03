@@ -1,66 +1,80 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
-import { Card } from '../models/Card';
-import { loadCards, isDueForReview } from '../utils/storage';
+import { Card, LeitnerSystem } from '../models/Card';
+import { isDueForReview, getCardsForSystem, loadSystems } from '../utils/storage';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
-  Home: undefined;
-  BoxDetails: { boxLevel: number };
-  AddCard: undefined;
-  Review: undefined;
+  LeitnerSystems: undefined;
+  Home: { systemId: string };
+  BoxDetails: { boxLevel: number; systemId: string };
+  AddCard: { systemId: string };
+  Review: { systemId: string };
 };
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
 
 interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
+  route: HomeScreenRouteProp;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+  const { systemId } = route.params;
+  const [system, setSystem] = useState<LeitnerSystem | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [boxCounts, setBoxCounts] = useState([0, 0, 0, 0, 0]);
   const [dueCards, setDueCards] = useState(0);
 
   useEffect(() => {
+    const loadSystemData = async () => {
+      const systems = await loadSystems();
+      const currentSystem = systems.find(s => s.id === systemId);
+      setSystem(currentSystem || null);
+    };
+  
+    const loadCardData = async () => {
+      const systemCards = await getCardsForSystem(systemId);
+      setCards(systemCards);
+      
+      // Count cards in each box
+      const counts = [0, 0, 0, 0, 0];
+      let dueCount = 0;
+      
+      systemCards.forEach(card => {
+        // Adjust for 0-based array and 1-based boxLevel
+        counts[card.boxLevel - 1]++;
+        
+        if (isDueForReview(card)) {
+          dueCount++;
+        }
+      });
+      
+      setBoxCounts(counts);
+      setDueCards(dueCount);
+    };
+
     // Update card data when the screen is focused
     const unsubscribe = navigation.addListener('focus', () => {
+      loadSystemData();
       loadCardData();
     });
 
     // Initial load
+    loadSystemData();
     loadCardData();
 
     return unsubscribe;
-  }, [navigation]);
-
-  const loadCardData = async () => {
-    const loadedCards = await loadCards();
-    setCards(loadedCards);
-    
-    // Count cards in each box
-    const counts = [0, 0, 0, 0, 0];
-    let dueCount = 0;
-    
-    loadedCards.forEach(card => {
-      // Adjust for 0-based array and 1-based boxLevel
-      counts[card.boxLevel - 1]++;
-      
-      if (isDueForReview(card)) {
-        dueCount++;
-      }
-    });
-    
-    setBoxCounts(counts);
-    setDueCards(dueCount);
-  };
+  }, [navigation, systemId]);
 
   const renderBoxItem = ({ item, index }: { item: number; index: number }) => {
     const boxLevel = index + 1;
     return (
       <TouchableOpacity 
         style={[styles.boxItem, { backgroundColor: boxLevel === 5 ? '#e6ffe6' : '#fff' }]}
-        onPress={() => navigation.navigate('BoxDetails', { boxLevel })}
+        onPress={() => navigation.navigate('BoxDetails', { boxLevel, systemId })}
       >
         <Text style={styles.boxTitle}>Box {boxLevel}</Text>
         <Text style={styles.boxCount}>{item} cards</Text>
@@ -75,10 +89,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     );
   };
 
+  if (!system) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Leitner System</Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.navigate('LeitnerSystems')}
+        >
+          <Text style={styles.backButtonText}>← All Systems</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>{system.name}</Text>
         <Text style={styles.subtitle}>Spaced Repetition Flashcards</Text>
       </View>
 
@@ -105,7 +135,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
           style={styles.button}
-          onPress={() => navigation.navigate('AddCard')}
+          onPress={() => navigation.navigate('AddCard', { systemId })}
         >
           <Text style={styles.buttonText}>Add New Card</Text>
         </TouchableOpacity>
@@ -113,7 +143,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {dueCards > 0 && (
           <TouchableOpacity 
             style={[styles.button, styles.reviewButton]}
-            onPress={() => navigation.navigate('Review')}
+            onPress={() => navigation.navigate('Review', { systemId })}
           >
             <Text style={styles.buttonText}>Start Review</Text>
           </TouchableOpacity>
@@ -141,6 +171,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     opacity: 0.8,
+  },
+  backButton: {
+    marginBottom: 10,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   statsContainer: {
     flexDirection: 'row',

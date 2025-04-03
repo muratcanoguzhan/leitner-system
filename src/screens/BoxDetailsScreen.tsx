@@ -9,13 +9,13 @@ import {
   Alert 
 } from 'react-native';
 import { Card } from '../models/Card';
-import { loadCards, saveCards } from '../utils/storage';
+import { loadCards, saveCards, getCardsForSystem } from '../utils/storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
-  Home: undefined;
-  BoxDetails: { boxLevel: number };
+  Home: { systemId: string };
+  BoxDetails: { boxLevel: number; systemId: string };
 };
 
 type BoxDetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BoxDetails'>;
@@ -27,18 +27,19 @@ interface BoxDetailsScreenProps {
 }
 
 const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }) => {
-  const { boxLevel } = route.params;
-  const [cards, setCards] = useState<Card[]>([]);
+  const { boxLevel, systemId } = route.params;
+  const [allCards, setAllCards] = useState<Card[]>([]);
   const [boxCards, setBoxCards] = useState<Card[]>([]);
 
   const loadCardData = useCallback(async () => {
-    const loadedCards = await loadCards();
-    setCards(loadedCards);
+    // Load all cards for the specific system
+    const loadedCards = await getCardsForSystem(systemId);
+    setAllCards(loadedCards);
     
     // Filter cards that belong to this box
     const cardsInBox = loadedCards.filter(card => card.boxLevel === boxLevel);
     setBoxCards(cardsInBox);
-  }, [boxLevel]);
+  }, [boxLevel, systemId]);
 
   useEffect(() => {
     loadCardData();
@@ -57,14 +58,17 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            // Get all cards first
+            const allStoredCards = await loadCards();
+            
             // Remove the card from the array
-            const updatedCards = cards.filter(card => card.id !== cardId);
+            const updatedAllCards = allStoredCards.filter(card => card.id !== cardId);
             
             // Save the updated array
-            await saveCards(updatedCards);
+            await saveCards(updatedAllCards);
             
             // Update state
-            setCards(updatedCards);
+            setAllCards(allCards.filter(card => card.id !== cardId));
             setBoxCards(boxCards.filter(card => card.id !== cardId));
           },
         },
@@ -131,9 +135,9 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => navigation.navigate('Home', { systemId })}
       >
-        <Text style={styles.backButtonText}>Back to Home</Text>
+        <Text style={styles.backButtonText}>Back to System</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

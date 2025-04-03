@@ -7,22 +7,26 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Card } from '../models/Card';
-import { loadCards, saveCards, isDueForReview } from '../utils/storage';
+import { saveCards, isDueForReview, getCardsForSystem } from '../utils/storage';
 import FlashCard from '../components/FlashCard';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
-  Home: undefined;
-  Review: undefined;
+  Home: { systemId: string };
+  Review: { systemId: string };
 };
 
 type ReviewScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Review'>;
+type ReviewScreenRouteProp = RouteProp<RootStackParamList, 'Review'>;
 
 interface ReviewScreenProps {
   navigation: ReviewScreenNavigationProp;
+  route: ReviewScreenRouteProp;
 }
 
-const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation }) => {
+const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
+  const { systemId } = route.params;
   const [cards, setCards] = useState<Card[]>([]);
   const [dueCards, setDueCards] = useState<Card[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -36,25 +40,26 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation }) => {
   });
 
   useEffect(() => {
-    loadCardData();
-  }, []);
+    const loadCardData = async () => {
+      // Load cards only for this specific system
+      const loadedCards = await getCardsForSystem(systemId);
+      setCards(loadedCards);
+      
+      // Filter cards that are due for review
+      const due = loadedCards.filter(card => isDueForReview(card));
+      setDueCards(due);
+      
+      setReviewStats({
+        total: due.length,
+        correct: 0,
+        incorrect: 0,
+        promoted: 0,
+        demoted: 0
+      });
+    };
 
-  const loadCardData = async () => {
-    const loadedCards = await loadCards();
-    setCards(loadedCards);
-    
-    // Filter cards that are due for review
-    const due = loadedCards.filter(card => isDueForReview(card));
-    setDueCards(due);
-    
-    setReviewStats({
-      total: due.length,
-      correct: 0,
-      incorrect: 0,
-      promoted: 0,
-      demoted: 0
-    });
-  };
+    loadCardData();
+  }, [systemId]);
 
   const handleCorrect = async () => {
     if (currentCardIndex >= dueCards.length) return;
@@ -139,7 +144,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation }) => {
   };
 
   const handleFinish = () => {
-    navigation.navigate('Home');
+    navigation.navigate('Home', { systemId });
   };
 
   if (dueCards.length === 0) {
@@ -152,9 +157,9 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation }) => {
           </Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => navigation.navigate('Home', { systemId })}
           >
-            <Text style={styles.buttonText}>Back to Home</Text>
+            <Text style={styles.buttonText}>Back to System</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -196,7 +201,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation }) => {
             style={styles.button}
             onPress={handleFinish}
           >
-            <Text style={styles.buttonText}>Back to Home</Text>
+            <Text style={styles.buttonText}>Back to System</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
