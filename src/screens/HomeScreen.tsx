@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
-import { Card, LeitnerSystem } from '../models/Card';
-import { isDueForReview, getCardsForSystem, loadSystems } from '../utils/storage';
+import { Card, LearningSession } from '../models/Card';
+import { isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
-  LeitnerSystems: undefined;
-  Home: { systemId: string };
-  BoxDetails: { boxLevel: number; systemId: string };
-  AddCard: { systemId: string };
-  Review: { systemId: string };
+  LearningSessions: undefined;
+  Home: { sessionId: string };
+  BoxDetails: { boxLevel: number; sessionId: string };
+  AddCard: { sessionId: string };
+  Review: { sessionId: string };
 };
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
@@ -22,28 +22,28 @@ interface HomeScreenProps {
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
-  const { systemId } = route.params;
-  const [system, setSystem] = useState<LeitnerSystem | null>(null);
+  const { sessionId } = route.params;
+  const [session, setSession] = useState<LearningSession | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [boxCounts, setBoxCounts] = useState([0, 0, 0, 0, 0]);
   const [dueCards, setDueCards] = useState(0);
 
   useEffect(() => {
-    const loadSystemData = async () => {
-      const systems = await loadSystems();
-      const currentSystem = systems.find(s => s.id === systemId);
-      setSystem(currentSystem || null);
+    const loadSessionData = async () => {
+      const sessions = await loadSessions();
+      const currentSession = sessions.find(s => s.id === sessionId);
+      setSession(currentSession || null);
     };
   
     const loadCardData = async () => {
-      const systemCards = await getCardsForSystem(systemId);
-      setCards(systemCards);
+      const sessionCards = await getCardsForSession(sessionId);
+      setCards(sessionCards);
       
       // Count cards in each box
       const counts = [0, 0, 0, 0, 0];
       let dueCount = 0;
       
-      systemCards.forEach(card => {
+      sessionCards.forEach(card => {
         // Adjust for 0-based array and 1-based boxLevel
         counts[card.boxLevel - 1]++;
         
@@ -58,23 +58,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 
     // Update card data when the screen is focused
     const unsubscribe = navigation.addListener('focus', () => {
-      loadSystemData();
+      loadSessionData();
       loadCardData();
     });
 
     // Initial load
-    loadSystemData();
+    loadSessionData();
     loadCardData();
 
     return unsubscribe;
-  }, [navigation, systemId]);
+  }, [navigation, sessionId]);
 
   const renderBoxItem = ({ item, index }: { item: number; index: number }) => {
     const boxLevel = index + 1;
     return (
       <TouchableOpacity 
         style={[styles.boxItem, { backgroundColor: boxLevel === 5 ? '#e6ffe6' : '#fff' }]}
-        onPress={() => navigation.navigate('BoxDetails', { boxLevel, systemId })}
+        onPress={() => navigation.navigate('BoxDetails', { boxLevel, sessionId })}
       >
         <Text style={styles.boxTitle}>Box {boxLevel}</Text>
         <Text style={styles.boxCount}>{item} cards</Text>
@@ -89,7 +89,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     );
   };
 
-  if (!system) {
+  if (!session) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -104,11 +104,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => navigation.navigate('LeitnerSystems')}
+          onPress={() => navigation.navigate('LearningSessions')}
         >
-          <Text style={styles.backButtonText}>← All Systems</Text>
+          <Text style={styles.backButtonText}>← All Sessions</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>{system.name}</Text>
+        <Text style={styles.title}>{session.name}</Text>
         <Text style={styles.subtitle}>Spaced Repetition Flashcards</Text>
       </View>
 
@@ -135,7 +135,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
           style={styles.button}
-          onPress={() => navigation.navigate('AddCard', { systemId })}
+          onPress={() => navigation.navigate('AddCard', { sessionId })}
         >
           <Text style={styles.buttonText}>Add New Card</Text>
         </TouchableOpacity>
@@ -143,7 +143,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         {dueCards > 0 && (
           <TouchableOpacity 
             style={[styles.button, styles.reviewButton]}
-            onPress={() => navigation.navigate('Review', { systemId })}
+            onPress={() => navigation.navigate('Review', { sessionId })}
           >
             <Text style={styles.buttonText}>Start Review</Text>
           </TouchableOpacity>

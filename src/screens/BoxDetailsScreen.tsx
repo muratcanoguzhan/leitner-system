@@ -9,13 +9,13 @@ import {
   Alert 
 } from 'react-native';
 import { Card } from '../models/Card';
-import { loadCards, saveCards, getCardsForSystem } from '../utils/storage';
+import { loadCards, saveCards, getCardsForSession } from '../utils/storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
-  Home: { systemId: string };
-  BoxDetails: { boxLevel: number; systemId: string };
+  Home: { sessionId: string };
+  BoxDetails: { boxLevel: number; sessionId: string };
 };
 
 type BoxDetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BoxDetails'>;
@@ -27,19 +27,19 @@ interface BoxDetailsScreenProps {
 }
 
 const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }) => {
-  const { boxLevel, systemId } = route.params;
+  const { boxLevel, sessionId } = route.params;
   const [allCards, setAllCards] = useState<Card[]>([]);
   const [boxCards, setBoxCards] = useState<Card[]>([]);
 
   const loadCardData = useCallback(async () => {
-    // Load all cards for the specific system
-    const loadedCards = await getCardsForSystem(systemId);
+    // Load all cards for the specific session
+    const loadedCards = await getCardsForSession(sessionId);
     setAllCards(loadedCards);
     
     // Filter cards that belong to this box
     const cardsInBox = loadedCards.filter(card => card.boxLevel === boxLevel);
     setBoxCards(cardsInBox);
-  }, [boxLevel, systemId]);
+  }, [boxLevel, sessionId]);
 
   useEffect(() => {
     loadCardData();
@@ -128,16 +128,16 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No cards in this box yet.</Text>
           <Text style={styles.emptySubtext}>
-            Add cards from the home screen and they'll appear here as they move through the system.
+            Add cards from the home screen and they'll appear here as they move through the session.
           </Text>
         </View>
       )}
 
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate('Home', { systemId })}
+        onPress={() => navigation.navigate('Home', { sessionId })}
       >
-        <Text style={styles.backButtonText}>Back to System</Text>
+        <Text style={styles.backButtonText}>Back to Session</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

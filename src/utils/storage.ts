@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card, LeitnerSystem } from '../models/Card';
+import { Card, LearningSession } from '../models/Card';
 import uuid from 'react-native-uuid';
 
 const CARDS_STORAGE_KEY = 'leitner_cards';
-const SYSTEMS_STORAGE_KEY = 'leitner_systems';
+const SESSIONS_STORAGE_KEY = 'learning_sessions';
 
 // Card operations
 export const saveCards = async (cards: Card[]): Promise<void> => {
@@ -34,9 +34,9 @@ export const loadCards = async (): Promise<Card[]> => {
   }
 };
 
-export const getCardsForSystem = async (systemId: string): Promise<Card[]> => {
+export const getCardsForSession = async (sessionId: string): Promise<Card[]> => {
   const allCards = await loadCards();
-  return allCards.filter(card => card.leitnerSystemId === systemId);
+  return allCards.filter(card => card.learningSessionId === sessionId);
 };
 
 export const clearAllCards = async (): Promise<void> => {
@@ -47,60 +47,60 @@ export const clearAllCards = async (): Promise<void> => {
   }
 };
 
-// Leitner System operations
-export const saveSystems = async (systems: LeitnerSystem[]): Promise<void> => {
+// Learning Session operations
+export const saveSessions = async (sessions: LearningSession[]): Promise<void> => {
   try {
-    const jsonValue = JSON.stringify(systems);
-    await AsyncStorage.setItem(SYSTEMS_STORAGE_KEY, jsonValue);
+    const jsonValue = JSON.stringify(sessions);
+    await AsyncStorage.setItem(SESSIONS_STORAGE_KEY, jsonValue);
   } catch (e) {
-    console.error('Error saving systems:', e);
+    console.error('Error saving sessions:', e);
   }
 };
 
-export const loadSystems = async (): Promise<LeitnerSystem[]> => {
+export const loadSessions = async (): Promise<LearningSession[]> => {
   try {
-    const jsonValue = await AsyncStorage.getItem(SYSTEMS_STORAGE_KEY);
+    const jsonValue = await AsyncStorage.getItem(SESSIONS_STORAGE_KEY);
     if (jsonValue) {
       // Parse the JSON and convert date strings to Date objects
-      const systems: LeitnerSystem[] = JSON.parse(jsonValue);
-      return systems.map(system => ({
-        ...system,
-        createdAt: new Date(system.createdAt)
+      const sessions: LearningSession[] = JSON.parse(jsonValue);
+      return sessions.map(session => ({
+        ...session,
+        createdAt: new Date(session.createdAt)
       }));
     }
     return [];
   } catch (e) {
-    console.error('Error loading systems:', e);
+    console.error('Error loading sessions:', e);
     return [];
   }
 };
 
-export const createLeitnerSystem = async (name: string): Promise<LeitnerSystem> => {
+export const createLearningSession = async (name: string): Promise<LearningSession> => {
   try {
-    const systems = await loadSystems();
-    const newSystem: LeitnerSystem = {
+    const sessions = await loadSessions();
+    const newSession: LearningSession = {
       id: uuid.v4().toString(),
       name,
       createdAt: new Date()
     };
     
-    await saveSystems([...systems, newSystem]);
-    return newSystem;
+    await saveSessions([...sessions, newSession]);
+    return newSession;
   } catch (error) {
-    console.error('Error creating Leitner system:', error);
+    console.error('Error creating learning session:', error);
     throw error; // Re-throw to allow the caller to handle it
   }
 };
 
-export const deleteLeitnerSystem = async (systemId: string): Promise<void> => {
-  // Delete the system
-  const systems = await loadSystems();
-  const updatedSystems = systems.filter(system => system.id !== systemId);
-  await saveSystems(updatedSystems);
+export const deleteLearningSession = async (sessionId: string): Promise<void> => {
+  // Delete the session
+  const sessions = await loadSessions();
+  const updatedSessions = sessions.filter(session => session.id !== sessionId);
+  await saveSessions(updatedSessions);
   
-  // Delete all cards associated with this system
+  // Delete all cards associated with this session
   const allCards = await loadCards();
-  const remainingCards = allCards.filter(card => card.leitnerSystemId !== systemId);
+  const remainingCards = allCards.filter(card => card.learningSessionId !== sessionId);
   await saveCards(remainingCards);
 };
 

@@ -7,14 +7,14 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Card } from '../models/Card';
-import { saveCards, isDueForReview, getCardsForSystem } from '../utils/storage';
+import { saveCards, isDueForReview, getCardsForSession } from '../utils/storage';
 import FlashCard from '../components/FlashCard';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
-  Home: { systemId: string };
-  Review: { systemId: string };
+  Home: { sessionId: string };
+  Review: { sessionId: string };
 };
 
 type ReviewScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Review'>;
@@ -26,7 +26,7 @@ interface ReviewScreenProps {
 }
 
 const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
-  const { systemId } = route.params;
+  const { sessionId } = route.params;
   const [cards, setCards] = useState<Card[]>([]);
   const [dueCards, setDueCards] = useState<Card[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -41,8 +41,8 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
 
   useEffect(() => {
     const loadCardData = async () => {
-      // Load cards only for this specific system
-      const loadedCards = await getCardsForSystem(systemId);
+      // Load cards only for this specific session
+      const loadedCards = await getCardsForSession(sessionId);
       setCards(loadedCards);
       
       // Filter cards that are due for review
@@ -59,7 +59,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     };
 
     loadCardData();
-  }, [systemId]);
+  }, [sessionId]);
 
   const handleCorrect = async () => {
     if (currentCardIndex >= dueCards.length) return;
@@ -144,7 +144,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   };
 
   const handleFinish = () => {
-    navigation.navigate('Home', { systemId });
+    navigation.navigate('Home', { sessionId });
   };
 
   if (dueCards.length === 0) {
@@ -157,9 +157,9 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
           </Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Home', { systemId })}
+            onPress={() => navigation.navigate('Home', { sessionId })}
           >
-            <Text style={styles.buttonText}>Back to System</Text>
+            <Text style={styles.buttonText}>Back to Session</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -201,7 +201,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
             style={styles.button}
             onPress={handleFinish}
           >
-            <Text style={styles.buttonText}>Back to System</Text>
+            <Text style={styles.buttonText}>Back to Session</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

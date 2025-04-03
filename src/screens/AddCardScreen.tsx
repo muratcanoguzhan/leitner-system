@@ -18,8 +18,8 @@ import {RouteProp} from '@react-navigation/native';
 import uuid from 'react-native-uuid';
 
 type RootStackParamList = {
-  Home: { systemId: string };
-  AddCard: { systemId: string };
+  Home: { sessionId: string };
+  AddCard: { sessionId: string };
 };
 
 type AddCardScreenNavigationProp = StackNavigationProp<
@@ -60,7 +60,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
         boxLevel: 1,
         lastReviewed: null,
         createdAt: new Date(),
-        leitnerSystemId: route.params.systemId,
+        learningSessionId: route.params.sessionId,
       };
 
       // Save the updated cards array
@@ -85,7 +85,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
           },
           {
             text: 'Go to Home',
-            onPress: () => navigation.navigate('Home', {systemId: route.params.systemId}),
+            onPress: () => navigation.navigate('Home', {sessionId: route.params.sessionId}),
           },
         ],
         {cancelable: false},

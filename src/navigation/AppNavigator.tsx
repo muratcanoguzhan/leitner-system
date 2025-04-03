@@ -6,14 +6,14 @@ import HomeScreen from '../screens/HomeScreen';
 import AddCardScreen from '../screens/AddCardScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import BoxDetailsScreen from '../screens/BoxDetailsScreen';
-import LeitnerSystemsScreen from '../screens/LeitnerSystemsScreen';
+import LearningSessionsScreen from '../screens/LearningSessionsScreen';
 
 export type RootStackParamList = {
-  LeitnerSystems: undefined;
-  Home: { systemId: string };
-  AddCard: { systemId: string };
-  Review: { systemId: string };
-  BoxDetails: { boxLevel: number; systemId: string };
+  LearningSessions: undefined;
+  Home: { sessionId: string };
+  AddCard: { sessionId: string };
+  Review: { sessionId: string };
+  BoxDetails: { boxLevel: number; sessionId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -22,13 +22,13 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="LeitnerSystems"
+        initialRouteName="LearningSessions"
         screenOptions={{
           headerShown: false,
           contentStyle: {backgroundColor: '#f9f9f9'},
           animation: 'slide_from_right',
         }}>
-        <Stack.Screen name="LeitnerSystems" component={LeitnerSystemsScreen} />
+        <Stack.Screen name="LearningSessions" component={LearningSessionsScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="AddCard" component={AddCardScreen} />
         <Stack.Screen name="Review" component={ReviewScreen} />

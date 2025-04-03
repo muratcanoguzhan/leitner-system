@@ -11,76 +11,76 @@ import {
   Modal
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { LeitnerSystem } from '../models/Card';
+import { LearningSession } from '../models/Card';
 import { 
-  loadSystems, 
-  createLeitnerSystem, 
-  deleteLeitnerSystem
+  loadSessions, 
+  createLearningSession, 
+  deleteLearningSession
 } from '../utils/storage';
 
 type RootStackParamList = {
-  LeitnerSystems: undefined;
-  Home: { systemId: string };
+  LearningSessions: undefined;
+  Home: { sessionId: string };
 };
 
-type LeitnerSystemsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'LeitnerSystems'>;
+type LearningSessionsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'LearningSessions'>;
 
-interface LeitnerSystemsScreenProps {
-  navigation: LeitnerSystemsScreenNavigationProp;
+interface LearningSessionsScreenProps {
+  navigation: LearningSessionsScreenNavigationProp;
 }
 
-const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation }) => {
-  const [systems, setSystems] = useState<LeitnerSystem[]>([]);
+const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigation }) => {
+  const [sessions, setSessions] = useState<LearningSession[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [newSystemName, setNewSystemName] = useState('');
+  const [newSessionName, setNewSessionName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      loadSystemsData();
+      loadSessionsData();
     });
 
     // Initial load
-    loadSystemsData();
+    loadSessionsData();
 
     return unsubscribe;
   }, [navigation]);
 
-  const loadSystemsData = async () => {
-    const loadedSystems = await loadSystems();
-    setSystems(loadedSystems);
+  const loadSessionsData = async () => {
+    const loadedSessions = await loadSessions();
+    setSessions(loadedSessions);
   };
 
-  const handleCreateSystem = async () => {
-    if (!newSystemName.trim()) {
-      Alert.alert('Error', 'Please enter a name for your Leitner system');
+  const handleCreateSession = async () => {
+    if (!newSessionName.trim()) {
+      Alert.alert('Error', 'Please enter a name for your learning session');
       return;
     }
 
     setIsCreating(true);
     try {
-      const newSystem = await createLeitnerSystem(newSystemName.trim());
-      setSystems([...systems, newSystem]);
+      const newSession = await createLearningSession(newSessionName.trim());
+      setSessions([...sessions, newSession]);
       setModalVisible(false);
-      setNewSystemName('');
+      setNewSessionName('');
       
-      // Navigate to the new system
-      navigation.navigate('Home', { systemId: newSystem.id });
+      // Navigate to the new session
+      navigation.navigate('Home', { sessionId: newSession.id });
     } catch (error) {
-      console.error('Failed to create Leitner system:', error);
+      console.error('Failed to create learning session:', error);
       Alert.alert(
         'Error',
-        'Failed to create Leitner system. Please check your internet connection and try again.'
+        'Failed to create learning session. Please check your internet connection and try again.'
       );
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handleDeleteSystem = async (system: LeitnerSystem) => {
+  const handleDeleteSession = async (session: LearningSession) => {
     Alert.alert(
-      'Delete Leitner System',
-      `Are you sure you want to delete "${system.name}"? This will delete all cards in this system.`,
+      'Delete Learning Session',
+      `Are you sure you want to delete "${session.name}"? This will delete all cards in this session.`,
       [
         { text: 'Cancel', style: 'cancel' },
         { 
@@ -88,10 +88,10 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteLeitnerSystem(system.id);
-              setSystems(systems.filter(s => s.id !== system.id));
+              await deleteLearningSession(session.id);
+              setSessions(sessions.filter(s => s.id !== session.id));
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete Leitner system');
+              Alert.alert('Error', 'Failed to delete learning session');
             }
           }
         }
@@ -99,22 +99,22 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
     );
   };
   
-  const renderSystemItem = ({ item }: { item: LeitnerSystem }) => {
+  const renderSessionItem = ({ item }: { item: LearningSession }) => {
     return (
       <TouchableOpacity 
-        style={styles.systemItem}
-        onPress={() => navigation.navigate('Home', { systemId: item.id })}
+        style={styles.sessionItem}
+        onPress={() => navigation.navigate('Home', { sessionId: item.id })}
       >
-        <View style={styles.systemInfo}>
-          <Text style={styles.systemName}>{item.name}</Text>
-          <Text style={styles.systemDate}>
+        <View style={styles.sessionInfo}>
+          <Text style={styles.sessionName}>{item.name}</Text>
+          <Text style={styles.sessionDate}>
             Created: {item.createdAt.toLocaleDateString()}
           </Text>
         </View>
         
         <TouchableOpacity 
           style={styles.deleteButton}
-          onPress={() => handleDeleteSystem(item)}
+          onPress={() => handleDeleteSession(item)}
         >
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
@@ -125,13 +125,13 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Leitner Systems</Text>
+        <Text style={styles.title}>My Learning Sessions</Text>
       </View>
 
-      {systems.length === 0 ? (
+      {sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>
-            You don't have any Leitner systems yet.
+            You don't have any learning sessions yet.
           </Text>
           <Text style={styles.emptySubText}>
             Create your first one to get started!
@@ -139,10 +139,10 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
         </View>
       ) : (
         <FlatList
-          data={systems}
-          renderItem={renderSystemItem}
+          data={sessions}
+          renderItem={renderSessionItem}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.systemsContainer}
+          contentContainerStyle={styles.sessionsContainer}
         />
       )}
 
@@ -150,7 +150,7 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.addButtonText}>Create New Leitner System</Text>
+        <Text style={styles.addButtonText}>Create New Learning Session</Text>
       </TouchableOpacity>
 
       <Modal
@@ -161,13 +161,13 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create New Leitner System</Text>
+            <Text style={styles.modalTitle}>Create New Learning Session</Text>
             
             <TextInput
               style={styles.input}
-              placeholder="Enter a name for your system"
-              value={newSystemName}
-              onChangeText={setNewSystemName}
+              placeholder="Enter a name for your session"
+              value={newSessionName}
+              onChangeText={setNewSessionName}
               autoFocus
             />
             
@@ -176,7 +176,7 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setModalVisible(false);
-                  setNewSystemName('');
+                  setNewSessionName('');
                 }}
                 disabled={isCreating}
               >
@@ -185,7 +185,7 @@ const LeitnerSystemsScreen: React.FC<LeitnerSystemsScreenProps> = ({ navigation 
               
               <TouchableOpacity
                 style={[styles.modalButton, styles.createButton]}
-                onPress={handleCreateSystem}
+                onPress={handleCreateSession}
                 disabled={isCreating}
               >
                 <Text style={styles.modalButtonText}>
@@ -214,10 +214,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  systemsContainer: {
+  sessionsContainer: {
     padding: 20,
   },
-  systemItem: {
+  sessionItem: {
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 15,
@@ -231,15 +231,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  systemInfo: {
+  sessionInfo: {
     flex: 1,
   },
-  systemName: {
+  sessionName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
   },
-  systemDate: {
+  sessionDate: {
     fontSize: 14,
     color: '#999',
     marginTop: 5,
@@ -339,4 +339,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LeitnerSystemsScreen; 
+export default LearningSessionsScreen; 
