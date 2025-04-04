@@ -7,6 +7,7 @@ import AddCardScreen from '../screens/AddCardScreen';
 import ReviewScreen from '../screens/ReviewScreen';
 import BoxDetailsScreen from '../screens/BoxDetailsScreen';
 import LearningSessionsScreen from '../screens/LearningSessionsScreen';
+import ConfigureBoxIntervalsScreen from '../screens/ConfigureBoxIntervalsScreen';
 
 export type RootStackParamList = {
   LearningSessions: undefined;
@@ -14,6 +15,7 @@ export type RootStackParamList = {
   AddCard: { sessionId: string };
   Review: { sessionId: string };
   BoxDetails: { boxLevel: number; sessionId: string };
+  ConfigureBoxIntervals: { sessionId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -33,6 +35,7 @@ const AppNavigator = () => {
         <Stack.Screen name="AddCard" component={AddCardScreen} />
         <Stack.Screen name="Review" component={ReviewScreen} />
         <Stack.Screen name="BoxDetails" component={BoxDetailsScreen} />
+        <Stack.Screen name="ConfigureBoxIntervals" component={ConfigureBoxIntervalsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -15,7 +15,8 @@ import { LearningSession } from '../models/Card';
 import { 
   loadSessions, 
   createLearningSession, 
-  deleteLearningSession
+  deleteLearningSession,
+  DEFAULT_BOX_INTERVALS
 } from '../utils/storage';
 
 type RootStackParamList = {
@@ -59,7 +60,8 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
 
     setIsCreating(true);
     try {
-      const newSession = await createLearningSession(newSessionName.trim());
+      // Create a new session with default box intervals
+      const newSession = await createLearningSession(newSessionName.trim(), DEFAULT_BOX_INTERVALS);
       setSessions([...sessions, newSession]);
       setModalVisible(false);
       setNewSessionName('');

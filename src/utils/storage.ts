@@ -1,9 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Card, LearningSession } from '../models/Card';
+import { Card, LearningSession, BoxIntervals } from '../models/Card';
 import uuid from 'react-native-uuid';
 
 const CARDS_STORAGE_KEY = 'leitner_cards';
 const SESSIONS_STORAGE_KEY = 'learning_sessions';
+
+// Default box intervals
+export const DEFAULT_BOX_INTERVALS: BoxIntervals = {
+  box1Days: 1,  // Every day
+  box2Days: 3,  // Every 3 days
+  box3Days: 7,  // Every week
+  box4Days: 14, // Every 2 weeks
+  box5Days: 30, // Every month
+};
 
 // Card operations
 export const saveCards = async (cards: Card[]): Promise<void> => {
@@ -75,13 +84,14 @@ export const loadSessions = async (): Promise<LearningSession[]> => {
   }
 };
 
-export const createLearningSession = async (name: string): Promise<LearningSession> => {
+export const createLearningSession = async (name: string, boxIntervals?: BoxIntervals): Promise<LearningSession> => {
   try {
     const sessions = await loadSessions();
     const newSession: LearningSession = {
       id: uuid.v4().toString(),
       name,
-      createdAt: new Date()
+      createdAt: new Date(),
+      boxIntervals: boxIntervals || DEFAULT_BOX_INTERVALS
     };
     
     await saveSessions([...sessions, newSession]);
@@ -105,13 +115,30 @@ export const deleteLearningSession = async (sessionId: string): Promise<void> =>
 };
 
 // Helper to determine if a card is due for review based on its box level
-export const isDueForReview = (card: Card): boolean => {
+export const isDueForReview = (card: Card, sessions?: LearningSession[]): boolean => {
   if (!card.lastReviewed) return true; // New card, never reviewed
   
   const today = new Date();
   const lastReview = new Date(card.lastReviewed);
   const daysSinceReview = Math.floor((today.getTime() - lastReview.getTime()) / (1000 * 60 * 60 * 24));
   
+  // Check if we have sessions and find the one for this card
+  if (sessions) {
+    const session = sessions.find(s => s.id === card.learningSessionId);
+    if (session && session.boxIntervals) {
+      // Use custom box intervals from the session
+      switch (card.boxLevel) {
+        case 1: return daysSinceReview >= session.boxIntervals.box1Days;
+        case 2: return daysSinceReview >= session.boxIntervals.box2Days;
+        case 3: return daysSinceReview >= session.boxIntervals.box3Days;
+        case 4: return daysSinceReview >= session.boxIntervals.box4Days;
+        case 5: return daysSinceReview >= session.boxIntervals.box5Days;
+        default: return true;
+      }
+    }
+  }
+  
+  // Fallback to default box intervals if no sessions provided or session not found
   switch (card.boxLevel) {
     case 1: return daysSinceReview >= 1; // Every day
     case 2: return daysSinceReview >= 3; // Every 3 days

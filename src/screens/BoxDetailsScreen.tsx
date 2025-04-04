@@ -8,8 +8,8 @@ import {
   SafeAreaView,
   Alert 
 } from 'react-native';
-import { Card } from '../models/Card';
-import { loadCards, saveCards, getCardsForSession } from '../utils/storage';
+import { Card, LearningSession } from '../models/Card';
+import { loadCards, saveCards, getCardsForSession, loadSessions } from '../utils/storage';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
@@ -30,15 +30,19 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   const { boxLevel, sessionId } = route.params;
   const [allCards, setAllCards] = useState<Card[]>([]);
   const [boxCards, setBoxCards] = useState<Card[]>([]);
+  const [session, setSession] = useState<LearningSession | null>(null);
 
   const loadCardData = useCallback(async () => {
-    // Load all cards for the specific session
     const loadedCards = await getCardsForSession(sessionId);
     setAllCards(loadedCards);
     
-    // Filter cards that belong to this box
     const cardsInBox = loadedCards.filter(card => card.boxLevel === boxLevel);
     setBoxCards(cardsInBox);
+    
+    // Load session data
+    const sessions = await loadSessions();
+    const currentSession = sessions.find(s => s.id === sessionId);
+    setSession(currentSession || null);
   }, [boxLevel, sessionId]);
 
   useEffect(() => {
@@ -94,13 +98,34 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   };
 
   const getBoxDescription = () => {
-    switch(boxLevel) {
-      case 1: return 'Review daily';
-      case 2: return 'Review every 3 days';
-      case 3: return 'Review weekly';
-      case 4: return 'Review bi-weekly';
-      case 5: return 'Review monthly';
-      default: return '';
+    if (session && session.boxIntervals) {
+      // Use the session's custom box intervals
+      switch(boxLevel) {
+        case 1: 
+          return session.boxIntervals.box1Days === 1 
+            ? 'Review daily' 
+            : `Review every ${session.boxIntervals.box1Days} days`;
+        case 2: 
+          return `Review every ${session.boxIntervals.box2Days} days`;
+        case 3: 
+          return `Review every ${session.boxIntervals.box3Days} days`;
+        case 4: 
+          return `Review every ${session.boxIntervals.box4Days} days`;
+        case 5: 
+          return `Review every ${session.boxIntervals.box5Days} days`;
+        default: 
+          return '';
+      }
+    } else {
+      // Fallback to default descriptions
+      switch(boxLevel) {
+        case 1: return 'Review daily';
+        case 2: return 'Review every 3 days';
+        case 3: return 'Review weekly';
+        case 4: return 'Review bi-weekly';
+        case 5: return 'Review monthly';
+        default: return '';
+      }
     }
   };
 

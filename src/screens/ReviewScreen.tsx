@@ -7,7 +7,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Card } from '../models/Card';
-import { saveCards, isDueForReview, getCardsForSession } from '../utils/storage';
+import { saveCards, isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
 import FlashCard from '../components/FlashCard';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -31,6 +31,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   const [dueCards, setDueCards] = useState<Card[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [reviewComplete, setReviewComplete] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [reviewStats, setReviewStats] = useState({
     total: 0,
     correct: 0,
@@ -41,23 +42,37 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
 
   useEffect(() => {
     const loadCardData = async () => {
-      // Load cards only for this specific session
-      const loadedCards = await getCardsForSession(sessionId);
-      setCards(loadedCards);
-      
-      // Filter cards that are due for review
-      const due = loadedCards.filter(card => isDueForReview(card));
-      setDueCards(due);
-      
-      setReviewStats({
-        total: due.length,
-        correct: 0,
-        incorrect: 0,
-        promoted: 0,
-        demoted: 0
-      });
+      try {
+        setLoading(true);
+        // Load cards only for this specific session
+        const loadedCards = await getCardsForSession(sessionId);
+        setCards(loadedCards);
+        
+        // Get all sessions to pass to isDueForReview
+        const allSessions = await loadSessions();
+        
+        // Filter cards that are due for review
+        const dueCardsArray = loadedCards.filter(card => 
+          isDueForReview(card, allSessions)
+        );
+        
+        setDueCards(dueCardsArray);
+        
+        setReviewStats({
+          total: dueCardsArray.length,
+          correct: 0,
+          incorrect: 0,
+          promoted: 0,
+          demoted: 0
+        });
+      } catch (error) {
+        console.error('Error loading cards for review:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
+    // Initial load
     loadCardData();
   }, [sessionId]);
 
@@ -146,6 +161,19 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   const handleFinish = () => {
     navigation.navigate('Home', { sessionId });
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>Loading...</Text>
+          <Text style={styles.emptySubtitle}>
+            Checking for cards due for review.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (dueCards.length === 0) {
     return (
