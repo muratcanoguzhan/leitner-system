@@ -10,6 +10,20 @@ export type BoxThemes = {
   [key: number]: BoxTheme;
 };
 
+// App-wide theme colors
+export const AppTheme = {
+  main: '#ffcc00',      // Main app color (changed from #4ecdc4)
+  background: '#f9f9f9',
+  text: {
+    dark: '#333',
+    medium: '#555',
+    light: '#666',
+  },
+  white: '#fff',
+  danger: '#ff6b6b',
+  success: '#66cc66',
+};
+
 // Central definition of box themes
 export const BOX_THEMES: BoxThemes = {
   1: { 

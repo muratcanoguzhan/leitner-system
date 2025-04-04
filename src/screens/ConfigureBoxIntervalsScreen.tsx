@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { LearningSession, BoxIntervals } from '../models/Card';
 import { loadSessions, saveSessions, DEFAULT_BOX_INTERVALS } from '../utils/storage';
+import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
   Home: { sessionId: string };
@@ -258,7 +259,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -337,10 +340,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   saveButton: {
-    backgroundColor: '#4ecdc4',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: AppTheme.main,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
+    marginVertical: 20,
+    marginHorizontal: 30,
   },
   saveButtonText: {
     color: '#fff',
@@ -355,7 +360,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   resetButtonText: {
-    color: '#666',
+    color: AppTheme.text.light,
     fontWeight: '500',
     fontSize: 16,
   },

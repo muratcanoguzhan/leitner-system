@@ -11,6 +11,7 @@ import { saveCards, isDueForReview, getCardsForSession, loadSessions } from '../
 import FlashCard from '../components/FlashCard';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
   Home: { sessionId: string };
@@ -271,7 +272,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -369,17 +372,27 @@ const styles = StyleSheet.create({
     color: '#ff6b6b',
   },
   button: {
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
     paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 25,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  scoreText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: AppTheme.main,
+    textAlign: 'center',
+    marginTop: 10,
   },
 });
 

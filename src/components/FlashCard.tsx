@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Card } from '../models/Card';
+import { AppTheme } from '../utils/themes';
 
 interface FlashCardProps {
   card: Card;
@@ -33,7 +34,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ card, onCorrect, onIncorrect }) =
 
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
-          style={[styles.button, styles.incorrectButton]}
+          style={[styles.button, styles.wrongButton]}
           onPress={onIncorrect}
         >
           <Text style={styles.buttonText}>Incorrect</Text>
@@ -104,20 +105,21 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 10,
     marginHorizontal: 5,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  incorrectButton: {
-    backgroundColor: '#ff6b6b',
-  },
   correctButton: {
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
+  },
+  wrongButton: {
+    backgroundColor: AppTheme.danger,
   },
   buttonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
   },
 });

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
-import { getBoxTheme } from '../utils/themes';
+import { getBoxTheme, AppTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
@@ -223,11 +223,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     elevation: 4,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   backButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -339,13 +339,13 @@ const styles = StyleSheet.create({
   buttonContainer: {
     padding: 20,
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
   },
   button: {
     flex: 1,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -358,10 +358,10 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   reviewButton: {
-    backgroundColor: '#ff6b6b',
+    backgroundColor: AppTheme.danger,
   },
   buttonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
   },
   configButtonText: {
-    color: '#555',
+    color: AppTheme.text.medium,
     fontSize: 14,
     fontWeight: '500',
   },

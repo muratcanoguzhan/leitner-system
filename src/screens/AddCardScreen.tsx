@@ -16,6 +16,7 @@ import {loadCards, saveCards} from '../utils/storage';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import uuid from 'react-native-uuid';
+import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
   Home: { sessionId: string };
@@ -172,7 +173,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
   title: {
     fontSize: 24,
@@ -216,7 +219,7 @@ const styles = StyleSheet.create({
   },
   buttonSave: {
     flex: 3,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -244,6 +247,13 @@ const styles = StyleSheet.create({
   buttonCancelText: {
     color: '#666',
     fontSize: 16,
+  },
+  addButton: {
+    backgroundColor: AppTheme.main,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    margin: 20,
   },
 });
 

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { loadCards, saveCards, getCardsForSession, loadSessions } from '../utils/storage';
-import { getBoxTheme } from '../utils/themes';
+import { getBoxTheme, AppTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
@@ -179,7 +179,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -229,13 +229,13 @@ const styles = StyleSheet.create({
   statsText: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#555',
+    color: AppTheme.text.medium,
   },
   listContainer: {
     padding: 20,
   },
   cardItem: {
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderRadius: 12,
     padding: 18,
     marginBottom: 15,
@@ -255,15 +255,15 @@ const styles = StyleSheet.create({
   cardFront: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
     marginBottom: 8,
   },
   cardBack: {
     fontSize: 16,
-    color: '#666',
+    color: AppTheme.text.light,
   },
   deleteButton: {
-    backgroundColor: '#ff6b6b',
+    backgroundColor: AppTheme.danger,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   deleteButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: '600',
     fontSize: 15,
   },
@@ -284,19 +284,19 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
     marginBottom: 12,
   },
   emptySubtext: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#666',
+    color: AppTheme.text.light,
     lineHeight: 24,
   },
   backButton: {
     margin: 20,
     padding: 16,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
     borderRadius: 12,
     alignItems: 'center',
     elevation: 2,
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   backButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },

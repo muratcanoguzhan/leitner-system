@@ -18,6 +18,7 @@ import {
   deleteLearningSession,
   DEFAULT_BOX_INTERVALS
 } from '../utils/storage';
+import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -101,20 +102,19 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
     );
   };
   
-  const renderSessionItem = ({ item }: { item: LearningSession }) => {
+  const renderSessionItem = ({ item }: { item: LearningSession }) => {    
     return (
       <TouchableOpacity 
-        style={styles.sessionItem}
+        style={styles.sessionCard}
         onPress={() => navigation.navigate('Home', { sessionId: item.id })}
       >
-        <View style={styles.sessionInfo}>
-          <Text style={styles.sessionName}>{item.name}</Text>
-          <Text style={styles.sessionDate}>
-            Created: {item.createdAt.toLocaleDateString()}
+        <View>
+          <Text style={styles.sessionTitle}>{item.name}</Text>
+          <Text style={styles.sessionSubtitle}>
+            Created: {new Date(item.createdAt).toLocaleDateString()}
           </Text>
         </View>
-        
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => handleDeleteSession(item)}
         >
@@ -209,7 +209,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
   title: {
     fontSize: 28,
@@ -219,16 +221,19 @@ const styles = StyleSheet.create({
   sessionsContainer: {
     padding: 20,
   },
-  sessionItem: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    elevation: 2,
+  sessionCard: {
+    backgroundColor: AppTheme.white,
+    borderRadius: 12,
+    padding: 20,
+    marginHorizontal: 20,
+    marginVertical: 10,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    borderLeftWidth: 3,
+    borderLeftColor: AppTheme.main,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -256,12 +261,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#4ecdc4',
-    margin: 20,
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: AppTheme.main,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
+    margin: 20,
   },
   addButtonText: {
     color: '#fff',
@@ -338,6 +342,16 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  sessionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  sessionSubtitle: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 5,
   },
 });
 
