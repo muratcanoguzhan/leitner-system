@@ -54,10 +54,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
         // Check each card if it's due for review
         for (const card of sessionCards) {
           // Adjust for 0-based array and 1-based boxLevel
-          counts[card.boxLevel - 1]++;
+          const boxIndex = Math.max(0, Math.min(card.boxLevel - 1, 4)); // Ensure we stay within bounds (0-4)
+          counts[boxIndex]++;
           
-          // Use the non-async version with sessions parameter
-          if (isDueForReview(card, allSessions)) {
+          // Use the async version with await
+          const isDue = await isDueForReview(card, allSessions);
+          if (isDue) {
             dueCount++;
           }
         }

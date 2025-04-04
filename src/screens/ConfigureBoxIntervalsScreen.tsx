@@ -12,7 +12,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { LearningSession, BoxIntervals } from '../models/Card';
-import { loadSessions, saveSessions, DEFAULT_BOX_INTERVALS } from '../utils/storage';
+import { getSession, DEFAULT_BOX_INTERVALS, saveSession } from '../utils/storage';
 import { AppTheme, BOX_THEMES } from '../utils/themes';
 
 type RootStackParamList = {
@@ -38,8 +38,8 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
   useEffect(() => {
     const loadSessionData = async () => {
       try {
-        const sessions = await loadSessions();
-        const currentSession = sessions.find(s => s.id === sessionId);
+        // Use getSession instead of loading all sessions
+        const currentSession = await getSession(sessionId);
         if (currentSession) {
           setSession(currentSession);
           setBoxIntervals(currentSession.boxIntervals);
@@ -55,18 +55,16 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
     loadSessionData();
   }, [sessionId]);
 
-  const handleSave = async () => {
-    if (!session) return;
-
+  const saveIntervals = async () => {
     // Validate all values are positive numbers
     const values = Object.values(boxIntervals);
     if (values.some(value => isNaN(value) || value <= 0)) {
       Alert.alert('Invalid Values', 'All review intervals must be positive numbers');
       return;
     }
-
-    // Validate box intervals are in ascending order
-    if (boxIntervals.box1Days >= boxIntervals.box2Days ||
+    
+    // Validate intervals are in ascending order
+    if (boxIntervals.box1Days >= boxIntervals.box2Days || 
         boxIntervals.box2Days >= boxIntervals.box3Days ||
         boxIntervals.box3Days >= boxIntervals.box4Days ||
         boxIntervals.box4Days >= boxIntervals.box5Days) {
@@ -76,32 +74,27 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
 
     setIsSaving(true);
     try {
-      const sessions = await loadSessions();
-      const updatedSessions = sessions.map(s => {
-        if (s.id === sessionId) {
-          return { ...s, boxIntervals };
-        }
-        return s;
-      });
-
-      await saveSessions(updatedSessions);
+      // We already have the session in state, no need to fetch it again
+      if (!session) {
+        throw new Error('Session not found');
+      }
       
-      // First complete the saving operation
+      // Update with new box intervals
+      const updatedSession = {
+        ...session,
+        boxIntervals
+      };
+      
+      await saveSession(updatedSession);
       setIsSaving(false);
       
-      // Then show the alert and navigate after it's dismissed
       Alert.alert(
         'Success', 
-        'Box intervals updated successfully. The new intervals will be applied to all cards.',
-        [
-          { 
-            text: 'OK', 
-            onPress: () => {
-              // Navigate to home screen to force a refresh
-              navigation.navigate('Home', { sessionId });
-            } 
-          }
-        ]
+        'Box intervals updated successfully.',
+        [{ 
+          text: 'OK', 
+          onPress: () => navigation.navigate('Home', { sessionId })
+        }]
       );
     } catch (error) {
       console.error('Error saving box intervals:', error);
@@ -112,10 +105,18 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
 
   const handleInputChange = (key: keyof BoxIntervals, value: string) => {
     const numValue = parseInt(value);
-    setBoxIntervals(prev => ({
-      ...prev,
-      [key]: isNaN(numValue) ? 0 : numValue
-    }));
+    
+    if (!isNaN(numValue) && numValue >= 0) {
+      setBoxIntervals(prev => ({
+        ...prev,
+        [key]: numValue
+      }));
+    } else if (value === '') {
+      setBoxIntervals(prev => ({
+        ...prev,
+        [key]: 0
+      }));
+    }
   };
 
   const resetToDefaults = () => {
@@ -171,7 +172,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
             borderLeftColor: BOX_THEMES[1].header,
-            backgroundColor: BOX_THEMES[1].bg + '40' // Adding 40 for slight transparency
+            backgroundColor: BOX_THEMES[1].bg + '40'
           }]}>
             <Text style={styles.boxLabel}>
               <Text>{BOX_THEMES[1].icon} </Text>
@@ -190,7 +191,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
             borderLeftColor: BOX_THEMES[2].header,
-            backgroundColor: BOX_THEMES[2].bg + '40' // Adding 40 for slight transparency
+            backgroundColor: BOX_THEMES[2].bg + '40'
           }]}>
             <Text style={styles.boxLabel}>
               <Text>{BOX_THEMES[2].icon} </Text>
@@ -209,7 +210,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
             borderLeftColor: BOX_THEMES[3].header,
-            backgroundColor: BOX_THEMES[3].bg + '40' // Adding 40 for slight transparency
+            backgroundColor: BOX_THEMES[3].bg + '40'
           }]}>
             <Text style={styles.boxLabel}>
               <Text>{BOX_THEMES[3].icon} </Text>
@@ -228,7 +229,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
             borderLeftColor: BOX_THEMES[4].header,
-            backgroundColor: BOX_THEMES[4].bg + '40' // Adding 40 for slight transparency
+            backgroundColor: BOX_THEMES[4].bg + '40'
           }]}>
             <Text style={styles.boxLabel}>
               <Text>{BOX_THEMES[4].icon} </Text>
@@ -247,7 +248,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
             borderLeftColor: BOX_THEMES[5].header,
-            backgroundColor: BOX_THEMES[5].bg + '40' // Adding 40 for slight transparency
+            backgroundColor: BOX_THEMES[5].bg + '40'
           }]}>
             <Text style={styles.boxLabel}>
               <Text>{BOX_THEMES[5].icon} </Text>
@@ -275,7 +276,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
       <View style={styles.footer}>
         <TouchableOpacity 
           style={styles.saveButton}
-          onPress={handleSave}
+          onPress={saveIntervals}
           disabled={isSaving}
         >
           <Text style={styles.saveButtonText}>

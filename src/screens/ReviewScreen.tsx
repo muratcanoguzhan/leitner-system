@@ -7,7 +7,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Card } from '../models/Card';
-import { saveCards, isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
+import { saveCard, isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
 import FlashCard from '../components/FlashCard';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -52,10 +52,14 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
         // Get all sessions to pass to isDueForReview
         const allSessions = await loadSessions();
         
-        // Filter cards that are due for review
-        const dueCardsArray = loadedCards.filter(card => 
-          isDueForReview(card, allSessions)
-        );
+        // Filter cards that are due for review - using async/await with isDueForReview
+        const dueCardsArray = [];
+        for (const card of loadedCards) {
+          const isDue = await isDueForReview(card, allSessions);
+          if (isDue) {
+            dueCardsArray.push(card);
+          }
+        }
         
         setDueCards(dueCardsArray);
         
@@ -106,8 +110,10 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
       card.id === updatedCard.id ? updatedCard : card
     );
     
-    // Save changes
-    await saveCards(updatedCards);
+    // Save changes to the individual card
+    await saveCard(updatedCard);
+    console.log('Card updated successfully:', updatedCard);
+    
     setCards(updatedCards);
     
     // Move to next card
@@ -143,8 +149,10 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
       card.id === updatedCard.id ? updatedCard : card
     );
     
-    // Save changes
-    await saveCards(updatedCards);
+    // Save changes to the individual card
+    await saveCard(updatedCard);
+    console.log('Card updated successfully:', updatedCard);
+    
     setCards(updatedCards);
     
     // Move to next card

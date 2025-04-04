@@ -95,7 +95,7 @@ The app is built with:
 - React Native
 - TypeScript
 - React Navigation
-- AsyncStorage for persistent storage
+- SQLite for persistent storage
 
 ## License
 

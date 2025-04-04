@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import {Card} from '../models/Card';
-import {loadCards, saveCards} from '../utils/storage';
+import {saveCard} from '../utils/storage';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import uuid from 'react-native-uuid';
@@ -50,9 +50,6 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
     setIsSubmitting(true);
 
     try {
-      // Load existing cards
-      const existingCards = await loadCards();
-
       // Create new card - will always start in box 1
       const newCard: Card = {
         id: uuid.v4().toString(),
@@ -64,8 +61,9 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
         learningSessionId: route.params.sessionId,
       };
 
-      // Save the updated cards array
-      await saveCards([...existingCards, newCard]);
+      // Save the card directly using saveCard
+      await saveCard(newCard);
+      console.log('Card saved successfully:', newCard);
 
       // Reset form
       setFront('');

@@ -9,7 +9,7 @@ import {
   Alert 
 } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
-import { loadCards, saveCards, getCardsForSession, loadSessions } from '../utils/storage';
+import { deleteCard, getCardsForSession, loadSessions } from '../utils/storage';
 import { getBoxTheme, AppTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -63,18 +63,18 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            // Get all cards first
-            const allStoredCards = await loadCards();
-            
-            // Remove the card from the array
-            const updatedAllCards = allStoredCards.filter(card => card.id !== cardId);
-            
-            // Save the updated array
-            await saveCards(updatedAllCards);
-            
-            // Update state
-            setAllCards(allCards.filter(card => card.id !== cardId));
-            setBoxCards(boxCards.filter(card => card.id !== cardId));
+            try {
+              // Delete the card directly
+              await deleteCard(cardId);
+              console.log('Card deleted successfully:', cardId);
+              
+              // Update state
+              setAllCards(allCards.filter(card => card.id !== cardId));
+              setBoxCards(boxCards.filter(card => card.id !== cardId));
+            } catch (error) {
+              console.error('Error deleting card:', error);
+              Alert.alert('Error', 'Failed to delete card. Please try again.');
+            }
           },
         },
       ]
