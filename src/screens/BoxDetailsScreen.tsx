@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { loadCards, saveCards, getCardsForSession, loadSessions } from '../utils/storage';
+import { getBoxTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
@@ -81,8 +82,10 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   };
 
   const renderCardItem = ({ item }: { item: Card }) => {
+    const theme = getBoxTheme(boxLevel);
+    
     return (
-      <View style={styles.cardItem}>
+      <View style={[styles.cardItem, { borderLeftColor: theme.border }]}>
         <View style={styles.cardContent}>
           <Text style={styles.cardFront}>{item.front}</Text>
           <Text style={styles.cardBack}>{item.back}</Text>
@@ -131,9 +134,14 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Box {boxLevel}</Text>
-        <Text style={styles.subtitle}>{getBoxDescription()}</Text>
+      <View style={[styles.header, { backgroundColor: getBoxTheme(boxLevel).header }]}>
+        <View style={styles.headerContent}>
+          <Text style={styles.boxIcon}>{getBoxTheme(boxLevel).icon}</Text>
+          <View>
+            <Text style={styles.title}>Box {boxLevel}</Text>
+            <Text style={styles.subtitle}>{getBoxDescription()}</Text>
+          </View>
+        </View>
       </View>
 
       <View style={styles.statsContainer}>
@@ -176,68 +184,96 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     backgroundColor: '#4ecdc4',
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  boxIcon: {
+    fontSize: 32,
+    marginRight: 15,
+    color: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
   },
   subtitle: {
     fontSize: 16,
     color: '#fff',
-    opacity: 0.8,
+    opacity: 0.9,
   },
   statsContainer: {
+    margin: 20,
+    marginBottom: 10,
     paddingVertical: 15,
     paddingHorizontal: 20,
+    borderRadius: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   statsText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#555',
   },
   listContainer: {
     padding: 20,
   },
   cardItem: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 15,
+    borderRadius: 12,
+    padding: 18,
     marginBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    borderLeftWidth: 4,
   },
   cardContent: {
     flex: 1,
   },
   cardFront: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   cardBack: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
   },
   deleteButton: {
     backgroundColor: '#ff6b6b',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
     marginLeft: 10,
+    elevation: 1,
   },
   deleteButtonText: {
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: 15,
   },
   emptyContainer: {
     flex: 1,
@@ -246,22 +282,28 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   emptyText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   emptySubtext: {
     fontSize: 16,
     textAlign: 'center',
     color: '#666',
+    lineHeight: 24,
   },
   backButton: {
     margin: 20,
-    padding: 15,
+    padding: 16,
     backgroundColor: '#4ecdc4',
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   backButtonText: {
     color: '#fff',

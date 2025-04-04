@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
+import { getBoxTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
@@ -87,6 +88,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     const boxLevel = index + 1;
     let reviewText = '';
     
+    // Get theme from shared utility
+    const theme = getBoxTheme(boxLevel);
+    
     // Use the session's custom box intervals if available
     if (session && session.boxIntervals) {
       switch(boxLevel) {
@@ -124,10 +128,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
     
     return (
       <TouchableOpacity 
-        style={[styles.boxItem, { backgroundColor: boxLevel === 5 ? '#e6ffe6' : '#fff' }]}
+        style={[
+          styles.boxItem, 
+          { 
+            backgroundColor: theme.bg,
+            borderColor: theme.border,
+            borderWidth: 1,
+          }
+        ]}
         onPress={() => navigation.navigate('BoxDetails', { boxLevel, sessionId })}
       >
-        <Text style={styles.boxTitle}>Box {boxLevel}</Text>
+        <View style={styles.boxHeader}>
+          <Text style={styles.boxIcon}>{theme.icon}</Text>
+          <Text style={styles.boxTitle}>Box {boxLevel}</Text>
+        </View>
         <Text style={styles.boxCount}>{item} cards</Text>
         <Text style={styles.boxDescription}>{reviewText}</Text>
       </TouchableOpacity>
@@ -214,6 +228,13 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     backgroundColor: '#4ecdc4',
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   title: {
     fontSize: 28,
@@ -223,7 +244,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#fff',
-    opacity: 0.8,
+    opacity: 0.9,
   },
   backButton: {
     marginBottom: 10,
@@ -238,12 +259,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 20,
     backgroundColor: '#fff',
-    borderRadius: 10,
-    elevation: 2,
+    borderRadius: 15,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    padding: 5,
   },
   statItem: {
     flex: 1,
@@ -251,7 +273,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#333',
   },
@@ -259,56 +281,81 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 5,
+    fontWeight: '500',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginTop: 25,
+    marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 10,
     color: '#333',
   },
   boxesContainer: {
     paddingHorizontal: 20,
+    paddingBottom: 10,
   },
   boxItem: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    elevation: 2,
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  boxHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  boxIcon: {
+    fontSize: 24,
+    marginRight: 10,
   },
   boxTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
   boxCount: {
     fontSize: 16,
-    color: '#666',
-    marginTop: 5,
+    color: '#555',
+    marginTop: 6,
+    marginBottom: 2,
   },
   boxDescription: {
     fontSize: 14,
-    color: '#999',
+    color: '#777',
     marginTop: 5,
   },
   buttonContainer: {
     padding: 20,
     flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
   },
   button: {
     flex: 1,
     backgroundColor: '#4ecdc4',
-    padding: 15,
-    borderRadius: 10,
+    padding: 16,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 5,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   reviewButton: {
     backgroundColor: '#ff6b6b',
@@ -318,21 +365,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 20,
-  },
   configButton: {
     backgroundColor: '#f0f0f0',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingVertical: 8,
+    borderRadius: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   configButtonText: {
-    color: '#666',
+    color: '#555',
     fontSize: 14,
     fontWeight: '500',
   },
