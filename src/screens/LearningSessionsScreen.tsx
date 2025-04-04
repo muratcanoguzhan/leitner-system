@@ -205,7 +205,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: AppTheme.white,
   },
   sessionsContainer: {
     padding: 20,
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   deleteButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
   },
   addButton: {
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   addButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -280,13 +280,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: '#333',
+    color: AppTheme.text.dark,
     textAlign: 'center',
     marginBottom: 10,
   },
   emptySubText: {
     fontSize: 16,
-    color: '#666',
+    color: AppTheme.text.light,
     textAlign: 'center',
   },
   modalContainer: {
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderRadius: 10,
     padding: 20,
     width: '80%',
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333',
+    color: AppTheme.text.dark,
     textAlign: 'center',
   },
   input: {
@@ -339,18 +339,18 @@ const styles = StyleSheet.create({
     backgroundColor: AppTheme.main,
   },
   modalButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
   sessionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   sessionSubtitle: {
     fontSize: 14,
-    color: '#999',
+    color: AppTheme.text.light,
     marginTop: 5,
   },
 });

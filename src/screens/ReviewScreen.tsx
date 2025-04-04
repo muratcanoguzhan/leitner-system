@@ -268,7 +268,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
@@ -282,11 +282,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: AppTheme.white,
   },
   progress: {
     fontSize: 16,
-    color: '#fff',
+    color: AppTheme.white,
     opacity: 0.9,
     fontWeight: '500',
   },
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   skipButtonText: {
-    color: '#666',
+    color: AppTheme.text.light,
     fontWeight: '500',
   },
   emptyContainer: {
@@ -317,13 +317,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   emptySubtitle: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 30,
-    color: '#666',
+    color: AppTheme.text.light,
   },
   completeContainer: {
     flex: 1,
@@ -335,10 +335,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   statsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderRadius: 10,
     padding: 20,
     width: '100%',
@@ -358,12 +358,12 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 16,
-    color: '#666',
+    color: AppTheme.text.light,
   },
   statValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   correctText: {
     color: AppTheme.main,
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   buttonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },

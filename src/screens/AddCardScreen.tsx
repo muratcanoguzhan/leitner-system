@@ -163,7 +163,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: AppTheme.background,
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -180,11 +180,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: AppTheme.white,
   },
   subtitle: {
     fontSize: 16,
-    color: '#fff',
+    color: AppTheme.white,
     opacity: 0.8,
   },
   formContainer: {
@@ -197,10 +197,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
@@ -234,18 +234,18 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonSaveText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
   buttonCancelText: {
-    color: '#666',
+    color: AppTheme.text.light,
     fontSize: 16,
   },
   addButton: {

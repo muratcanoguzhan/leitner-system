@@ -239,11 +239,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: AppTheme.white,
   },
   subtitle: {
     fontSize: 16,
-    color: '#fff',
+    color: AppTheme.white,
     opacity: 0.9,
   },
   backButton: {
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 20,
     marginHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderRadius: 15,
     elevation: 3,
     shadowColor: '#000',
@@ -275,11 +275,11 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
+    color: AppTheme.text.light,
     marginTop: 5,
     fontWeight: '500',
   },
@@ -294,14 +294,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   boxesContainer: {
     paddingHorizontal: 20,
     paddingBottom: 10,
   },
   boxItem: {
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderRadius: 15,
     padding: 16,
     marginBottom: 12,
@@ -323,17 +323,17 @@ const styles = StyleSheet.create({
   boxTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
   },
   boxCount: {
     fontSize: 16,
-    color: '#555',
+    color: AppTheme.text.medium,
     marginTop: 6,
     marginBottom: 2,
   },
   boxDescription: {
     fontSize: 14,
-    color: '#777',
+    color: AppTheme.text.light,
     marginTop: 5,
   },
   buttonContainer: {
