@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   createButton: {
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
   },
   modalButtonText: {
     color: '#fff',
