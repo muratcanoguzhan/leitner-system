@@ -381,11 +381,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#ff6b6b',
+    color: AppTheme.danger,
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#4ecdc4',
+    backgroundColor: AppTheme.main,
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',

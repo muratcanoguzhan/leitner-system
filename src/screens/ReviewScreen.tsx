@@ -366,10 +366,10 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   correctText: {
-    color: '#4ecdc4',
+    color: AppTheme.main,
   },
   incorrectText: {
-    color: '#ff6b6b',
+    color: AppTheme.danger,
   },
   button: {
     backgroundColor: AppTheme.main,
