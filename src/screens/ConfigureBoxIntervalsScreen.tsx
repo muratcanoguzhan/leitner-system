@@ -13,7 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { LearningSession, BoxIntervals } from '../models/Card';
 import { loadSessions, saveSessions, DEFAULT_BOX_INTERVALS } from '../utils/storage';
-import { AppTheme } from '../utils/themes';
+import { AppTheme, BOX_THEMES } from '../utils/themes';
 
 type RootStackParamList = {
   Home: { sessionId: string };
@@ -168,10 +168,17 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
         </Text>
 
         <View style={styles.intervalContainer}>
-          <View style={styles.intervalRow}>
-            <Text style={styles.boxLabel}>Box 1:</Text>
+          <View style={[styles.intervalRow, { 
+            borderLeftWidth: 4, 
+            borderLeftColor: BOX_THEMES[1].header,
+            backgroundColor: BOX_THEMES[1].bg + '40' // Adding 40 for slight transparency
+          }]}>
+            <Text style={styles.boxLabel}>
+              <Text>{BOX_THEMES[1].icon} </Text>
+              Box 1:
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { borderColor: BOX_THEMES[1].border }]}
               keyboardType="numeric"
               value={boxIntervals.box1Days.toString()}
               onChangeText={(value) => handleInputChange('box1Days', value)}
@@ -180,10 +187,17 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
             <Text style={styles.daysText}>days</Text>
           </View>
 
-          <View style={styles.intervalRow}>
-            <Text style={styles.boxLabel}>Box 2:</Text>
+          <View style={[styles.intervalRow, { 
+            borderLeftWidth: 4, 
+            borderLeftColor: BOX_THEMES[2].header,
+            backgroundColor: BOX_THEMES[2].bg + '40' // Adding 40 for slight transparency
+          }]}>
+            <Text style={styles.boxLabel}>
+              <Text>{BOX_THEMES[2].icon} </Text>
+              Box 2:
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { borderColor: BOX_THEMES[2].border }]}
               keyboardType="numeric"
               value={boxIntervals.box2Days.toString()}
               onChangeText={(value) => handleInputChange('box2Days', value)}
@@ -192,10 +206,17 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
             <Text style={styles.daysText}>days</Text>
           </View>
 
-          <View style={styles.intervalRow}>
-            <Text style={styles.boxLabel}>Box 3:</Text>
+          <View style={[styles.intervalRow, { 
+            borderLeftWidth: 4, 
+            borderLeftColor: BOX_THEMES[3].header,
+            backgroundColor: BOX_THEMES[3].bg + '40' // Adding 40 for slight transparency
+          }]}>
+            <Text style={styles.boxLabel}>
+              <Text>{BOX_THEMES[3].icon} </Text>
+              Box 3:
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { borderColor: BOX_THEMES[3].border }]}
               keyboardType="numeric"
               value={boxIntervals.box3Days.toString()}
               onChangeText={(value) => handleInputChange('box3Days', value)}
@@ -204,10 +225,17 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
             <Text style={styles.daysText}>days</Text>
           </View>
 
-          <View style={styles.intervalRow}>
-            <Text style={styles.boxLabel}>Box 4:</Text>
+          <View style={[styles.intervalRow, { 
+            borderLeftWidth: 4, 
+            borderLeftColor: BOX_THEMES[4].header,
+            backgroundColor: BOX_THEMES[4].bg + '40' // Adding 40 for slight transparency
+          }]}>
+            <Text style={styles.boxLabel}>
+              <Text>{BOX_THEMES[4].icon} </Text>
+              Box 4:
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { borderColor: BOX_THEMES[4].border }]}
               keyboardType="numeric"
               value={boxIntervals.box4Days.toString()}
               onChangeText={(value) => handleInputChange('box4Days', value)}
@@ -216,10 +244,17 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
             <Text style={styles.daysText}>days</Text>
           </View>
 
-          <View style={styles.intervalRow}>
-            <Text style={styles.boxLabel}>Box 5:</Text>
+          <View style={[styles.intervalRow, { 
+            borderLeftWidth: 4, 
+            borderLeftColor: BOX_THEMES[5].header,
+            backgroundColor: BOX_THEMES[5].bg + '40' // Adding 40 for slight transparency
+          }]}>
+            <Text style={styles.boxLabel}>
+              <Text>{BOX_THEMES[5].icon} </Text>
+              Box 5:
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { borderColor: BOX_THEMES[5].border }]}
               keyboardType="numeric"
               value={boxIntervals.box5Days.toString()}
               onChangeText={(value) => handleInputChange('box5Days', value)}
@@ -255,7 +290,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
@@ -269,14 +304,14 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   backButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontSize: 18,
     fontWeight: 'bold',
   },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: AppTheme.white,
   },
   content: {
     flex: 1,
@@ -285,17 +320,17 @@ const styles = StyleSheet.create({
   sessionName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
     marginBottom: 10,
   },
   description: {
     fontSize: 16,
-    color: '#666',
+    color: AppTheme.text.light,
     marginBottom: 20,
     lineHeight: 22,
   },
   intervalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
@@ -309,14 +344,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
+    paddingHorizontal: 10,
+    marginBottom: 8,
+    borderRadius: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
   boxLabel: {
-    width: 80,
+    width: 100,
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.text.dark,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   input: {
     width: 80,
@@ -331,13 +372,13 @@ const styles = StyleSheet.create({
   daysText: {
     marginLeft: 10,
     fontSize: 16,
-    color: '#666',
+    color: AppTheme.text.light,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.white,
   },
   saveButton: {
     backgroundColor: AppTheme.main,
@@ -348,7 +389,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
   },
   saveButtonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -371,7 +412,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: '#666',
+    color: AppTheme.text.light,
   },
   errorContainer: {
     flex: 1,
@@ -391,7 +432,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
