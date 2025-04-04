@@ -13,10 +13,12 @@ import { deleteCard, getCardsForSession, loadSessions } from '../utils/storage';
 import { getBoxTheme, AppTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 type RootStackParamList = {
   Home: { sessionId: string };
   BoxDetails: { boxLevel: number; sessionId: string };
+  EditCard: { cardId: string };
 };
 
 type BoxDetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BoxDetails'>;
@@ -49,6 +51,13 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   useEffect(() => {
     loadCardData();
   }, [loadCardData]);
+
+  // Reload data when screen comes into focus (e.g., when returning from EditCardScreen)
+  useFocusEffect(
+    useCallback(() => {
+      loadCardData();
+    }, [loadCardData])
+  );
 
   const handleDeleteCard = (cardId: string) => {
     Alert.alert(
@@ -90,12 +99,20 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
           <Text style={styles.cardFront}>{item.front}</Text>
           <Text style={styles.cardBack}>{item.back}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDeleteCard(item.id)}
-        >
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.editButton]}
+            onPress={() => navigation.navigate('EditCard', { cardId: item.id })}
+          >
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.deleteButton]}
+            onPress={() => handleDeleteCard(item.id)}
+          >
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };
@@ -262,13 +279,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: AppTheme.text.light,
   },
+  buttonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 8,
+    marginLeft: 5,
+  },
+  editButton: {
+    backgroundColor: AppTheme.main,
+  },
+  editButtonText: {
+    color: AppTheme.white,
+    fontWeight: '600',
+    fontSize: 15,
+  },
   deleteButton: {
     backgroundColor: AppTheme.danger,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    marginLeft: 10,
-    elevation: 1,
   },
   deleteButtonText: {
     color: AppTheme.white,
