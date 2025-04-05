@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { deleteCard, getCardsForSession, loadSessions } from '../utils/storage';
-import { getBoxTheme, AppTheme } from '../utils/themes';
+import { getBoxTheme, AppStyles } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -96,23 +96,23 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
     const theme = getBoxTheme(boxLevel);
     
     return (
-      <View style={[styles.cardItem, { borderLeftColor: theme.border }]}>
+      <View style={[AppStyles.list.item, { borderLeftColor: theme.border }]}>
         <View style={styles.cardContent}>
-          <Text style={styles.cardFront}>{item.front}</Text>
-          <Text style={styles.cardBack}>{item.back}</Text>
+          <Text style={AppStyles.text.title}>{item.front}</Text>
+          <Text style={AppStyles.text.subtitle}>{item.back}</Text>
         </View>
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
-            style={[styles.button, styles.editButton]}
+            style={[AppStyles.button.primary, styles.actionButton]}
             onPress={() => navigation.navigate('EditCard', { cardId: item.id })}
           >
-            <Text style={styles.editButtonText}>Edit</Text>
+            <Text style={AppStyles.button.primaryText}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.button, styles.deleteButton]}
+            style={[AppStyles.button.danger, styles.actionButton]}
             onPress={() => handleDeleteCard(item.id)}
           >
-            <Text style={styles.deleteButtonText}>Delete</Text>
+            <Text style={AppStyles.button.primaryText}>Delete</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -152,7 +152,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={AppStyles.container.main}>
       <View style={[styles.header, { backgroundColor: getBoxTheme(boxLevel).header }]}>
         <BackButton 
           onPress={() => navigation.goBack()} 
@@ -167,8 +167,8 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         </View>
       </View>
 
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>
+      <View style={AppStyles.stats.container}>
+        <Text style={AppStyles.text.regular}>
           {boxCards.length} {boxCards.length === 1 ? 'card' : 'cards'} in this box
         </Text>
       </View>
@@ -178,12 +178,12 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
           data={boxCards}
           renderItem={renderCardItem}
           keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={AppStyles.list.container}
         />
       ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No cards in this box yet.</Text>
-          <Text style={styles.emptySubtext}>
+        <View style={AppStyles.loading.container}>
+          <Text style={[AppStyles.text.title, { marginBottom: 12 }]}>No cards in this box yet.</Text>
+          <Text style={[AppStyles.text.subtitle, { textAlign: 'center', lineHeight: 24 }]}>
             Add cards from the home screen and they'll appear here as they move through the session.
           </Text>
         </View>
@@ -193,14 +193,9 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: AppTheme.background,
-  },
   header: {
     padding: 20,
     paddingVertical: 25,
-    backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     elevation: 4,
@@ -231,99 +226,16 @@ const styles = StyleSheet.create({
     color: '#fff',
     opacity: 0.9,
   },
-  statsContainer: {
-    margin: 20,
-    marginBottom: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: AppTheme.white,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  statsText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: AppTheme.text.medium,
-  },
-  listContainer: {
-    padding: 20,
-  },
-  cardItem: {
-    backgroundColor: AppTheme.white,
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    borderLeftWidth: 4,
-  },
   cardContent: {
     flex: 1,
-  },
-  cardFront: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: AppTheme.text.dark,
-    marginBottom: 8,
-  },
-  cardBack: {
-    fontSize: 16,
-    color: AppTheme.text.light,
   },
   buttonsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  button: {
+  actionButton: {
     padding: 10,
-    borderRadius: 8,
     marginLeft: 5,
-  },
-  editButton: {
-    backgroundColor: AppTheme.main,
-  },
-  editButtonText: {
-    color: AppTheme.white,
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  deleteButton: {
-    backgroundColor: AppTheme.danger,
-  },
-  deleteButtonText: {
-    color: AppTheme.white,
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: AppTheme.text.dark,
-    marginBottom: 12,
-  },
-  emptySubtext: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: AppTheme.text.light,
-    lineHeight: 24,
   },
   backButtonIcon: {
     position: 'absolute',

@@ -16,7 +16,7 @@ import {saveCard} from '../utils/storage';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import uuid from 'react-native-uuid';
-import { AppTheme } from '../utils/themes';
+import { AppTheme, AppStyles } from '../utils/themes';
 import BackButton from '../components/BackButton';
 
 type RootStackParamList = {
@@ -99,19 +99,19 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={AppStyles.container.main}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
         <ScrollView contentContainerStyle={styles.scrollView}>
-          <View style={styles.header}>
+          <View style={AppStyles.header.main}>
             <BackButton 
               onPress={() => navigation.goBack()} 
               style={styles.backButton}
             />
-            <View style={styles.headerContent}>
-              <Text style={styles.title}>Add New Card</Text>
-              <Text style={styles.subtitle}>
+            <View style={AppStyles.header.content}>
+              <Text style={AppStyles.text.header}>Add New Card</Text>
+              <Text style={[AppStyles.text.subtitle, { color: AppTheme.white, opacity: 0.8 }]}>
                 New cards will be added to Box 1
               </Text>
             </View>
@@ -119,9 +119,9 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
 
           <View style={styles.formContainer}>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Front (Question)</Text>
+              <Text style={AppStyles.form.label}>Front (Question)</Text>
               <TextInput
-                style={styles.input}
+                style={AppStyles.form.textArea}
                 value={front}
                 onChangeText={setFront}
                 placeholder="Enter the question or word"
@@ -131,9 +131,9 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Back (Answer)</Text>
+              <Text style={AppStyles.form.label}>Back (Answer)</Text>
               <TextInput
-                style={[styles.input, styles.inputBack]}
+                style={[AppStyles.form.textArea, styles.inputBack]}
                 value={back}
                 onChangeText={setBack}
                 placeholder="Enter the answer or definition"
@@ -145,10 +145,14 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[styles.buttonSave, isSubmitting && styles.buttonDisabled, styles.singleButton]}
+              style={[
+                AppStyles.button.primary, 
+                isSubmitting && AppStyles.button.disabled, 
+                styles.singleButton
+              ]}
               onPress={handleSave}
               disabled={isSubmitting}>
-              <Text style={styles.buttonSaveText}>
+              <Text style={AppStyles.button.primaryText}>
                 {isSubmitting ? 'Adding...' : 'Add Card'}
               </Text>
             </TouchableOpacity>
@@ -160,60 +164,17 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: AppTheme.background,
-  },
   keyboardAvoidingView: {
     flex: 1,
   },
   scrollView: {
     flexGrow: 1,
   },
-  header: {
-    padding: 20,
-    backgroundColor: AppTheme.main,
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
-    position: 'relative',
-  },
-  headerContent: {
-    alignItems: 'center',
-    paddingTop: 5,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: AppTheme.white,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: AppTheme.white,
-    opacity: 0.8,
-    textAlign: 'center',
-  },
   formContainer: {
     padding: 20,
   },
   inputGroup: {
     marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: AppTheme.text.dark,
-  },
-  input: {
-    backgroundColor: AppTheme.white,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    minHeight: 100,
-    textAlignVertical: 'top',
-    borderWidth: 1,
-    borderColor: '#ddd',
   },
   inputBack: {
     minHeight: 150,
@@ -222,22 +183,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 20,
     marginTop: 'auto',
-  },
-  buttonSave: {
-    flex: 3,
-    backgroundColor: AppTheme.main,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonSaveText: {
-    color: AppTheme.white,
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   backButton: {
     position: 'absolute',
