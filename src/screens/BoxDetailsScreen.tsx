@@ -252,42 +252,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 2,
   },
-  statsContainer: {
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 15,
-    borderRadius: 10,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 2,
-  },
-  statsText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  listContainer: {
-    padding: 20,
-  },
-  card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 15,
-    elevation: 2,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 2,
-  },
-  cardContent: {
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  cardSubtitle: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -297,27 +261,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 6,
     marginLeft: 8,
-  },
-  actionButtonText: {
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
   },
   rowLayout: {
     flexDirection: 'row',

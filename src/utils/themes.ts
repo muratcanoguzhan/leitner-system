@@ -146,23 +146,6 @@ export const getAppStyles = (mode: ThemeMode) => {
         shadowOpacity: mode === 'light' ? 0.1 : 0.05,
         shadowRadius: 3,
       } as ViewStyle,
-      modal: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: mode === 'light' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.7)',
-      } as ViewStyle,
-      modalContent: {
-        backgroundColor: theme.white,
-        borderRadius: 10,
-        padding: 20,
-        width: '80%',
-        elevation: 5,
-        shadowColor: mode === 'light' ? '#000' : '#fff',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: mode === 'light' ? 0.25 : 0.15,
-        shadowRadius: 3.84,
-      } as ViewStyle,
     },
     
     // Headers
@@ -201,13 +184,6 @@ export const getAppStyles = (mode: ThemeMode) => {
         color: mode === 'light' ? theme.white : theme.text.dark,
         textAlign: 'center',
       } as TextStyle,
-      modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: theme.text.dark,
-        textAlign: 'center',
-      } as TextStyle,
       regular: {
         fontSize: 16, 
         color: theme.text.medium,
@@ -220,15 +196,6 @@ export const getAppStyles = (mode: ThemeMode) => {
     
     // Form elements
     form: {
-      input: {
-        backgroundColor: theme.white,
-        borderWidth: 1,
-        borderColor: mode === 'light' ? '#ddd' : '#444',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 16,
-        color: theme.text.dark,
-      } as TextStyle,
       label: {
         fontSize: 16,
         fontWeight: 'bold',
@@ -270,14 +237,6 @@ export const getAppStyles = (mode: ThemeMode) => {
         backgroundColor: theme.danger,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-      } as ViewStyle,
-      success: {
-        backgroundColor: theme.success,
-        paddingVertical: 12,
-        paddingHorizontal: 16, 
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
@@ -329,25 +288,6 @@ export const getAppStyles = (mode: ThemeMode) => {
         shadowOpacity: mode === 'light' ? 0.1 : 0.05,
         shadowRadius: 3,
       } as ViewStyle,
-      row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      } as ViewStyle,
-      item: {
-        alignItems: 'center',
-        padding: 12,
-      } as ViewStyle,
-      value: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: theme.text.dark,
-      } as TextStyle,
-      label: {
-        fontSize: 14,
-        color: theme.text.light,
-        marginTop: 4,
-      } as TextStyle,
     },
     
     // Loading states

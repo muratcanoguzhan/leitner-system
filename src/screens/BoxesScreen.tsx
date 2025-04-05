@@ -374,9 +374,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  configButtonTextLandscape: {
-    fontSize: 12,
-  },
   boxesContainer: {
     paddingHorizontal: 20,
     paddingBottom: 20,
