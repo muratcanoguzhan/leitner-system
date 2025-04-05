@@ -16,7 +16,6 @@ import { getSession, DEFAULT_BOX_INTERVALS, saveSession } from '../utils/storage
 import { BOX_THEMES, DARK_BOX_THEMES, AppTheme } from '../utils/themes';
 import BackButton from '../components/BackButton';
 import { useTheme } from '../utils/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -171,7 +170,6 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
           style={styles.backButtonIcon}
         />
         <Text style={[styles.title, { color: isDarkMode ? '#000' : '#fff' }]}>Configure Review Intervals</Text>
-        <ThemeToggle style={styles.themeToggle} />
       </View>
 
       <ScrollView style={styles.content}>
@@ -417,12 +415,6 @@ const styles = StyleSheet.create({
   daysText: {
     marginLeft: 10,
     fontSize: 16,
-  },
-  themeToggle: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    zIndex: 10,
   },
   resetButton: {
     position: 'absolute',

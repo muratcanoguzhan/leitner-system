@@ -14,7 +14,6 @@ import { RouteProp } from '@react-navigation/native';
 import { AppTheme } from '../utils/themes';
 import { CardStats } from '../services/StatisticsService';
 import { useTheme } from '../utils/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -185,7 +184,6 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { backgroundColor: theme.main }]}>
           <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Card Review</Text>
-          <ThemeToggle style={styles.themeToggle} />
         </View>
         <View style={styles.emptyContainer}>
           <Text style={[styles.emptyTitle, { color: theme.text.dark }]}>Loading...</Text>
@@ -202,7 +200,6 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { backgroundColor: theme.main }]}>
           <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Card Review</Text>
-          <ThemeToggle style={styles.themeToggle} />
         </View>
         <View style={styles.emptyContainer}>
           <Text style={[styles.emptyTitle, { color: theme.text.dark }]}>No Cards Due</Text>
@@ -227,7 +224,6 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { backgroundColor: theme.main }]}>
           <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Review Complete</Text>
-          <ThemeToggle style={styles.themeToggle} />
         </View>
         <View style={styles.completeContainer}>
           <Text style={[styles.completeTitle, { color: theme.text.dark }]}>Review Complete!</Text>
@@ -279,7 +275,6 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.header, { backgroundColor: theme.main }]}>
         <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Card Review</Text>
-        <ThemeToggle style={styles.themeToggle} />
       </View>
       <View style={styles.progressContainer}>
         <Text style={[styles.progressText, { color: theme.text.light }]}>
@@ -321,9 +316,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  themeToggle: {
-    // Add appropriate styles for the theme toggle component
   },
   emptyContainer: {
     flex: 1,

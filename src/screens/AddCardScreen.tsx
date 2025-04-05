@@ -16,10 +16,9 @@ import {saveCard} from '../utils/storage';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import uuid from 'react-native-uuid';
-import { AppTheme, AppStyles } from '../utils/themes';
+import { AppStyles } from '../utils/themes';
 import BackButton from '../components/BackButton';
 import { useTheme } from '../utils/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -120,7 +119,6 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
                 New cards will be added to Box 1
               </Text>
             </View>
-            <ThemeToggle style={styles.themeToggle} />
           </View>
 
           <View style={styles.formContainer}>
@@ -205,12 +203,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 15,
     left: 10,
-    zIndex: 10,
-  },
-  themeToggle: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
     zIndex: 10,
   },
   singleButton: {

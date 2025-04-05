@@ -17,7 +17,6 @@ import { Card } from '../models/Card';
 import { saveCard, getCard } from '../utils/storage';
 import { AppStyles } from '../utils/themes';
 import { useTheme } from '../utils/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
 import BackButton from '../components/BackButton';
 
 type RootStackParamList = {
@@ -136,7 +135,6 @@ const EditCardScreen: React.FC<EditCardScreenProps> = ({ navigation, route }) =>
               style={styles.backButton}
             />
             <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Edit Card</Text>
-            <ThemeToggle style={styles.themeToggle} />
           </View>
 
           <View style={styles.content}>
@@ -234,12 +232,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 5,
     left: 0,
-    zIndex: 10,
-  },
-  themeToggle: {
-    position: 'absolute',
-    top: 5,
-    right: 0,
     zIndex: 10,
   },
   headerTitle: {

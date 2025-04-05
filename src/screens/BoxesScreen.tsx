@@ -9,7 +9,6 @@ import FloatingAddButton from '../components/FloatingAddButton';
 import BackButton from '../components/BackButton';
 import { SessionStats, getSessionStats } from '../services/StatisticsService';
 import { useTheme } from '../utils/ThemeContext';
-import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -194,7 +193,6 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
               Spaced Repetition Flashcards
             </Text>
           </View>
-          <ThemeToggle style={styles.themeToggle} />
         </View>
 
         <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape, { 
@@ -309,12 +307,6 @@ const styles = StyleSheet.create({
   subtitleLandscape: {
     fontSize: 12,
     textAlign: 'left',
-  },
-  themeToggle: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    zIndex: 10,
   },
   statsContainer: {
     flexDirection: 'row',

@@ -15,7 +15,6 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
-import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../utils/ThemeContext';
 
 type RootStackParamList = {
@@ -173,7 +172,6 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
             <Text style={[styles.subtitle, { color: isDarkMode ? '#eee' : '#f0f0f0' }]}>{getBoxDescription()}</Text>
           </View>
         </View>
-        <ThemeToggle style={styles.themeToggle} />
       </View>
 
       <View style={[AppStyles.stats.container, {
@@ -228,12 +226,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 15,
     left: 15,
-    zIndex: 10,
-  },
-  themeToggle: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
     zIndex: 10,
   },
   boxIcon: {
