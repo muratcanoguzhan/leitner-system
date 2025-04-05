@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
 import { getBoxTheme, AppTheme } from '../utils/themes';
@@ -182,62 +182,61 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.header, isLandscape && styles.headerLandscape]}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.navigate('LearningSessions')}
-        >
-          <Text style={[styles.backButtonText, isLandscape && styles.backButtonTextLandscape]}>← All Sessions</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, isLandscape && styles.titleLandscape]}>{session.name}</Text>
-        <Text style={[styles.subtitle, isLandscape && styles.subtitleLandscape]}>Spaced Repetition Flashcards</Text>
-      </View>
-
-      <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape]}>
-        <View style={styles.statItem}>
-          <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{cards.length}</Text>
-          <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Total Cards</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{dueCards}</Text>
-          <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Due for Review</Text>
-        </View>
-      </View>
-
-      <View style={[styles.sectionHeader, isLandscape && styles.sectionHeaderLandscape]}>
-        <Text style={[styles.sectionTitle, isLandscape && styles.sectionTitleLandscape]}>Your Boxes</Text>
-        <TouchableOpacity 
-          style={[styles.configButton, isLandscape && styles.configButtonLandscape]}
-          onPress={() => navigation.navigate('ConfigureBoxIntervals', { sessionId })}
-        >
-          <Text style={[styles.configButtonText, isLandscape && styles.configButtonTextLandscape]}>Configure Intervals</Text>
-        </TouchableOpacity>
-      </View>
-      
-      <FlatList
-        data={boxCounts}
-        renderItem={renderBoxItem}
-        keyExtractor={(_, index) => index.toString()}
-        contentContainerStyle={styles.boxesContainer}
-      />
-
-      <View style={[styles.buttonContainer, isLandscape && styles.buttonContainerLandscape]}>
-        <TouchableOpacity 
-          style={[styles.button, isLandscape && styles.buttonLandscape]}
-          onPress={() => navigation.navigate('AddCard', { sessionId })}
-        >
-          <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Add New Card</Text>
-        </TouchableOpacity>
-        
-        {dueCards > 0 && (
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={[styles.header, isLandscape && styles.headerLandscape]}>
           <TouchableOpacity 
-            style={[styles.button, styles.reviewButton, isLandscape && styles.buttonLandscape]}
-            onPress={() => navigation.navigate('Review', { sessionId })}
+            style={styles.backButton}
+            onPress={() => navigation.navigate('LearningSessions')}
           >
-            <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Start Review</Text>
+            <Text style={[styles.backButtonText, isLandscape && styles.backButtonTextLandscape]}>← All Sessions</Text>
           </TouchableOpacity>
-        )}
-      </View>
+          <Text style={[styles.title, isLandscape && styles.titleLandscape]}>{session.name}</Text>
+          <Text style={[styles.subtitle, isLandscape && styles.subtitleLandscape]}>Spaced Repetition Flashcards</Text>
+        </View>
+
+        <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape]}>
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{cards.length}</Text>
+            <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Total Cards</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{dueCards}</Text>
+            <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Due for Review</Text>
+          </View>
+        </View>
+
+        <View style={[styles.sectionHeader, isLandscape && styles.sectionHeaderLandscape]}>
+          <Text style={[styles.sectionTitle, isLandscape && styles.sectionTitleLandscape]}>Your Boxes</Text>
+          <TouchableOpacity 
+            style={[styles.configButton, isLandscape && styles.configButtonLandscape]}
+            onPress={() => navigation.navigate('ConfigureBoxIntervals', { sessionId })}
+          >
+            <Text style={[styles.configButtonText, isLandscape && styles.configButtonTextLandscape]}>Configure Intervals</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.boxesListContainer}>
+          {boxCounts.map((count, index) => renderBoxItem({ item: count, index }))}
+        </View>
+
+        <View style={[styles.buttonContainer, isLandscape && styles.buttonContainerLandscape]}>
+          <TouchableOpacity 
+            style={[styles.button, isLandscape && styles.buttonLandscape]}
+            onPress={() => navigation.navigate('AddCard', { sessionId })}
+          >
+            <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Add New Card</Text>
+          </TouchableOpacity>
+          
+          {dueCards > 0 && (
+            <TouchableOpacity 
+              style={[styles.button, styles.reviewButton, isLandscape && styles.buttonLandscape]}
+              onPress={() => navigation.navigate('Review', { sessionId })}
+            >
+              <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Start Review</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -246,6 +245,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: AppTheme.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     padding: 20,
@@ -352,9 +354,8 @@ const styles = StyleSheet.create({
   sectionTitleLandscape: {
     fontSize: 18,
   },
-  boxesContainer: {
+  boxesListContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 10,
   },
   boxItem: {
     backgroundColor: AppTheme.white,
@@ -471,6 +472,9 @@ const styles = StyleSheet.create({
   },
   configButtonTextLandscape: {
     fontSize: 12,
+  },
+  spacer: {
+    height: 100, // This adds space between boxes and buttons
   },
 });
 
