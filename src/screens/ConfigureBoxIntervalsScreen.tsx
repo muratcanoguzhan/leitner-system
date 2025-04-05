@@ -16,7 +16,8 @@ import { getSession, DEFAULT_BOX_INTERVALS, saveSession } from '../utils/storage
 import { AppTheme, BOX_THEMES } from '../utils/themes';
 
 type RootStackParamList = {
-  Home: { sessionId: string };
+  LearningSessions: undefined;
+  Boxes: { sessionId: string };
   ConfigureBoxIntervals: { sessionId: string };
 };
 
@@ -93,7 +94,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
         'Box intervals updated successfully.',
         [{ 
           text: 'OK', 
-          onPress: () => navigation.navigate('Home', { sessionId })
+          onPress: () => navigation.navigate('Boxes', { sessionId })
         }]
       );
     } catch (error) {

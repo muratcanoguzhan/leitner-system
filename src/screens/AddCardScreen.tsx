@@ -19,7 +19,8 @@ import uuid from 'react-native-uuid';
 import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
-  Home: { sessionId: string };
+  LearningSessions: undefined;
+  Boxes: { sessionId: string };
   AddCard: { sessionId: string };
 };
 
@@ -84,7 +85,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
           },
           {
             text: 'Go to Home',
-            onPress: () => navigation.navigate('Home', {sessionId: route.params.sessionId}),
+            onPress: () => navigation.navigate('Boxes', {sessionId: route.params.sessionId}),
           },
         ],
         {cancelable: false},

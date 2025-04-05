@@ -16,7 +16,8 @@ import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 
 type RootStackParamList = {
-  Home: { sessionId: string };
+  LearningSessions: undefined;
+  Boxes: { sessionId: string };
   BoxDetails: { boxLevel: number; sessionId: string };
   EditCard: { cardId: string };
 };
@@ -185,7 +186,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate('Home', { sessionId })}
+        onPress={() => navigation.navigate('Boxes', { sessionId })}
       >
         <Text style={styles.backButtonText}>Back to Session</Text>
       </TouchableOpacity>

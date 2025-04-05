@@ -22,7 +22,7 @@ import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
   LearningSessions: undefined;
-  Home: { sessionId: string };
+  Boxes: { sessionId: string };
 };
 
 type LearningSessionsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'LearningSessions'>;
@@ -68,7 +68,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
       setNewSessionName('');
       
       // Navigate to the new session
-      navigation.navigate('Home', { sessionId: newSession.id });
+      navigation.navigate('Boxes', { sessionId: newSession.id });
     } catch (error) {
       console.error('Failed to create learning session:', error);
       Alert.alert(
@@ -106,7 +106,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
     return (
       <TouchableOpacity 
         style={styles.sessionCard}
-        onPress={() => navigation.navigate('Home', { sessionId: item.id })}
+        onPress={() => navigation.navigate('Boxes', { sessionId: item.id })}
       >
         <View>
           <Text style={styles.sessionTitle}>{item.name}</Text>

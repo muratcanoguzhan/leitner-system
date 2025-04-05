@@ -14,7 +14,8 @@ import { RouteProp } from '@react-navigation/native';
 import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
-  Home: { sessionId: string };
+  LearningSessions: undefined;
+  Boxes: { sessionId: string };
   Review: { sessionId: string };
 };
 
@@ -168,7 +169,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   };
 
   const handleFinish = () => {
-    navigation.navigate('Home', { sessionId });
+    navigation.navigate('Boxes', { sessionId });
   };
 
   if (loading) {
@@ -194,7 +195,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
           </Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Home', { sessionId })}
+            onPress={() => navigation.navigate('Boxes', { sessionId })}
           >
             <Text style={styles.buttonText}>Back to Session</Text>
           </TouchableOpacity>

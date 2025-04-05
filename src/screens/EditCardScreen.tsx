@@ -18,7 +18,7 @@ import { saveCard, getCard } from '../utils/storage';
 import { AppTheme } from '../utils/themes';
 
 type RootStackParamList = {
-  Home: { sessionId: string };
+  Boxes: { sessionId: string };
   BoxDetails: { boxLevel: number; sessionId: string };
   EditCard: { cardId: string };
 };

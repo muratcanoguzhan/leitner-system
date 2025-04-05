@@ -8,22 +8,22 @@ import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
   LearningSessions: undefined;
-  Home: { sessionId: string };
+  Boxes: { sessionId: string };
   BoxDetails: { boxLevel: number; sessionId: string };
   AddCard: { sessionId: string };
   Review: { sessionId: string };
   ConfigureBoxIntervals: { sessionId: string };
 };
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
-type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
+type BoxesScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Boxes'>;
+type BoxesScreenRouteProp = RouteProp<RootStackParamList, 'Boxes'>;
 
-interface HomeScreenProps {
-  navigation: HomeScreenNavigationProp;
-  route: HomeScreenRouteProp;
+interface BoxesScreenProps {
+  navigation: BoxesScreenNavigationProp;
+  route: BoxesScreenRouteProp;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
+const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
   const { sessionId } = route.params;
   const [session, setSession] = useState<LearningSession | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
@@ -385,4 +385,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen; 
+export default BoxesScreen; 
