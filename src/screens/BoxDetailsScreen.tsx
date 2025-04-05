@@ -14,6 +14,7 @@ import { getBoxTheme, AppTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
+import BackButton from '../components/BackButton';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -153,6 +154,10 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.header, { backgroundColor: getBoxTheme(boxLevel).header }]}>
+        <BackButton 
+          onPress={() => navigation.goBack()} 
+          style={styles.backButtonIcon}
+        />
         <View style={styles.headerContent}>
           <Text style={styles.boxIcon}>{getBoxTheme(boxLevel).icon}</Text>
           <View>
@@ -183,13 +188,6 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
           </Text>
         </View>
       )}
-
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate('Boxes', { sessionId })}
-      >
-        <Text style={styles.backButtonText}>Back to Session</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -201,6 +199,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
+    paddingVertical: 25,
     backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
@@ -209,10 +208,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    position: 'relative',
+    alignItems: 'center',
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   boxIcon: {
     fontSize: 32,
@@ -323,22 +325,11 @@ const styles = StyleSheet.create({
     color: AppTheme.text.light,
     lineHeight: 24,
   },
-  backButton: {
-    margin: 20,
-    padding: 16,
-    backgroundColor: AppTheme.main,
-    borderRadius: 12,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  backButtonText: {
-    color: AppTheme.white,
-    fontWeight: 'bold',
-    fontSize: 16,
+  backButtonIcon: {
+    position: 'absolute',
+    top: 15,
+    left: 15,
+    zIndex: 10,
   },
 });
 

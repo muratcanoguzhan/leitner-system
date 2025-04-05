@@ -14,6 +14,7 @@ import { RouteProp } from '@react-navigation/native';
 import { LearningSession, BoxIntervals } from '../models/Card';
 import { getSession, DEFAULT_BOX_INTERVALS, saveSession } from '../utils/storage';
 import { AppTheme, BOX_THEMES } from '../utils/themes';
+import BackButton from '../components/BackButton';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -153,12 +154,10 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
+        <BackButton 
           onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
+          style={styles.backButtonIcon}
+        />
         <Text style={styles.title}>Configure Review Intervals</Text>
       </View>
 
@@ -296,19 +295,23 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
+    paddingVertical: 25,
     backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
-    flexDirection: 'row',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    position: 'relative',
     alignItems: 'center',
   },
-  backButton: {
-    marginRight: 10,
-  },
-  backButtonText: {
-    color: AppTheme.white,
-    fontSize: 18,
-    fontWeight: 'bold',
+  backButtonIcon: {
+    position: 'absolute',
+    top: 15,
+    left: 15,
+    zIndex: 10,
   },
   title: {
     fontSize: 22,

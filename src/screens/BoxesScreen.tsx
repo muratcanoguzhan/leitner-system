@@ -5,6 +5,8 @@ import { isDueForReview, getCardsForSession, loadSessions } from '../utils/stora
 import { getBoxTheme, AppTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import FloatingAddButton from '../components/FloatingAddButton';
+import BackButton from '../components/BackButton';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -184,14 +186,14 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={[styles.header, isLandscape && styles.headerLandscape]}>
-          <TouchableOpacity 
-            style={styles.backButton}
+          <BackButton 
             onPress={() => navigation.navigate('LearningSessions')}
-          >
-            <Text style={[styles.backButtonText, isLandscape && styles.backButtonTextLandscape]}>← All Sessions</Text>
-          </TouchableOpacity>
-          <Text style={[styles.title, isLandscape && styles.titleLandscape]}>{session.name}</Text>
-          <Text style={[styles.subtitle, isLandscape && styles.subtitleLandscape]}>Spaced Repetition Flashcards</Text>
+            style={styles.backButtonIcon}
+          />
+          <View style={styles.headerContent}>
+            <Text style={[styles.title, isLandscape && styles.titleLandscape]}>{session.name}</Text>
+            <Text style={[styles.subtitle, isLandscape && styles.subtitleLandscape]}>Spaced Repetition Flashcards</Text>
+          </View>
         </View>
 
         <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape]}>
@@ -219,24 +221,21 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
           {boxCounts.map((count, index) => renderBoxItem({ item: count, index }))}
         </View>
 
-        <View style={[styles.buttonContainer, isLandscape && styles.buttonContainerLandscape]}>
-          <TouchableOpacity 
-            style={[styles.button, isLandscape && styles.buttonLandscape]}
-            onPress={() => navigation.navigate('AddCard', { sessionId })}
-          >
-            <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Add New Card</Text>
-          </TouchableOpacity>
-          
-          {dueCards > 0 && (
-            <TouchableOpacity 
-              style={[styles.button, styles.reviewButton, isLandscape && styles.buttonLandscape]}
-              onPress={() => navigation.navigate('Review', { sessionId })}
-            >
-              <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Start Review</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <View style={styles.spacer} />
       </ScrollView>
+      
+      <FloatingAddButton 
+        onPress={() => navigation.navigate('AddCard', { sessionId })}
+      />
+      
+      {dueCards > 0 && (
+        <TouchableOpacity 
+          style={[styles.reviewFloatingButton]}
+          onPress={() => navigation.navigate('Review', { sessionId })}
+        >
+          <Text style={styles.reviewFloatingButtonText}>Start Review</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -251,6 +250,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
+    paddingVertical: 25,
     backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
@@ -259,38 +259,41 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    position: 'relative',
+    alignItems: 'center',
+  },
+  headerContent: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerLandscape: {
-    padding: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+  },
+  backButtonIcon: {
+    position: 'absolute',
+    top: 15,
+    left: 15,
+    zIndex: 10,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: AppTheme.white,
+    color: '#fff',
+    textAlign: 'center',
   },
   titleLandscape: {
     fontSize: 22,
   },
   subtitle: {
     fontSize: 16,
-    color: AppTheme.white,
+    color: '#fff',
     opacity: 0.9,
+    textAlign: 'center',
   },
   subtitleLandscape: {
     fontSize: 14,
-  },
-  backButton: {
-    marginBottom: 10,
-  },
-  backButtonText: {
-    color: AppTheme.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  backButtonTextLandscape: {
-    fontSize: 14,
-    marginBottom: 5,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -475,6 +478,35 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 100, // This adds space between boxes and buttons
+  },
+  reviewFloatingButton: {
+    position: 'absolute',
+    bottom: 25,
+    left: 25,
+    backgroundColor: AppTheme.danger,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    zIndex: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  reviewFloatingButtonText: {
+    color: AppTheme.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
 });
 

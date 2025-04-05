@@ -17,6 +17,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import uuid from 'react-native-uuid';
 import { AppTheme } from '../utils/themes';
+import BackButton from '../components/BackButton';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -104,10 +105,16 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
         style={styles.keyboardAvoidingView}>
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Add New Card</Text>
-            <Text style={styles.subtitle}>
-              New cards will be added to Box 1
-            </Text>
+            <BackButton 
+              onPress={() => navigation.goBack()} 
+              style={styles.backButton}
+            />
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>Add New Card</Text>
+              <Text style={styles.subtitle}>
+                New cards will be added to Box 1
+              </Text>
+            </View>
           </View>
 
           <View style={styles.formContainer}>
@@ -138,14 +145,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={styles.buttonCancel}
-              onPress={() => navigation.goBack()}
-              disabled={isSubmitting}>
-              <Text style={styles.buttonCancelText}>Cancel</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.buttonSave, isSubmitting && styles.buttonDisabled]}
+              style={[styles.buttonSave, isSubmitting && styles.buttonDisabled, styles.singleButton]}
               onPress={handleSave}
               disabled={isSubmitting}>
               <Text style={styles.buttonSaveText}>
@@ -175,16 +175,23 @@ const styles = StyleSheet.create({
     backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
+    position: 'relative',
+  },
+  headerContent: {
+    alignItems: 'center',
+    paddingTop: 5,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: AppTheme.white,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     color: AppTheme.white,
     opacity: 0.8,
+    textAlign: 'center',
   },
   formContainer: {
     padding: 20,
@@ -224,17 +231,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonCancel: {
-    flex: 2,
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: AppTheme.white,
-  },
   buttonDisabled: {
     opacity: 0.7,
   },
@@ -243,16 +239,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  buttonCancelText: {
-    color: AppTheme.text.light,
-    fontSize: 16,
+  backButton: {
+    position: 'absolute',
+    top: 15,
+    left: 10,
+    zIndex: 10,
   },
-  addButton: {
-    backgroundColor: AppTheme.main,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    margin: 20,
+  singleButton: {
+    flex: 1,
   },
 });
 

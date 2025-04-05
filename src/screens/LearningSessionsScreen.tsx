@@ -19,6 +19,7 @@ import {
   DEFAULT_BOX_INTERVALS
 } from '../utils/storage';
 import { AppTheme } from '../utils/themes';
+import FloatingAddButton from '../components/FloatingAddButton';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -127,7 +128,9 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My Learning Sessions</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>My Learning Sessions</Text>
+        </View>
       </View>
 
       {sessions.length === 0 ? (
@@ -148,12 +151,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
         />
       )}
 
-      <TouchableOpacity 
-        style={styles.addButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.addButtonText}>Create New Learning Session</Text>
-      </TouchableOpacity>
+      <FloatingAddButton onPress={() => setModalVisible(true)} />
 
       <Modal
         animationType="slide"
@@ -212,11 +210,17 @@ const styles = StyleSheet.create({
     backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
+    position: 'relative',
+  },
+  headerContent: {
+    alignItems: 'center',
+    paddingTop: 5,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: AppTheme.white,
+    textAlign: 'center',
   },
   sessionsContainer: {
     padding: 20,
@@ -259,18 +263,6 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: AppTheme.white,
     fontWeight: 'bold',
-  },
-  addButton: {
-    backgroundColor: AppTheme.main,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    margin: 20,
-  },
-  addButtonText: {
-    color: AppTheme.white,
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   emptyContainer: {
     flex: 1,
