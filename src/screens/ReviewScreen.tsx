@@ -175,6 +175,12 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     }
   };
 
+  const moveToPrevCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+    }
+  };
+
   const handleFinish = () => {
     navigation.navigate('Boxes', { sessionId });
   };
@@ -282,11 +288,45 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
         </Text>
       </View>
       
-      <FlashCard 
-        card={dueCards[currentCardIndex]} 
-        onCorrect={handleCorrect}
-        onIncorrect={handleIncorrect}
-      />
+      <View style={styles.cardContainer}>
+        <TouchableOpacity
+          style={[styles.arrowButton, styles.leftArrow, { 
+            backgroundColor: isDarkMode ? 'rgba(50, 50, 50, 0.85)' : 'rgba(240, 240, 240, 0.85)',
+            opacity: currentCardIndex === 0 ? 0.4 : 1,
+            borderColor: isDarkMode ? '#444' : '#ddd',
+          }]}
+          onPress={moveToPrevCard}
+          disabled={currentCardIndex === 0}
+        >
+          <Text style={[styles.arrowText, { 
+            color: currentCardIndex === 0 
+              ? (isDarkMode ? '#555' : '#bbb') 
+              : (isDarkMode ? '#fff' : theme.main)
+          }]}>◀</Text>
+        </TouchableOpacity>
+        
+        <FlashCard 
+          card={dueCards[currentCardIndex]} 
+          onCorrect={handleCorrect}
+          onIncorrect={handleIncorrect}
+        />
+        
+        <TouchableOpacity
+          style={[styles.arrowButton, styles.rightArrow, { 
+            backgroundColor: isDarkMode ? 'rgba(50, 50, 50, 0.85)' : 'rgba(240, 240, 240, 0.85)',
+            opacity: currentCardIndex === dueCards.length - 1 ? 0.4 : 1,
+            borderColor: isDarkMode ? '#444' : '#ddd',
+          }]}
+          onPress={moveToNextCard}
+          disabled={currentCardIndex === dueCards.length - 1}
+        >
+          <Text style={[styles.arrowText, { 
+            color: currentCardIndex === dueCards.length - 1 
+              ? (isDarkMode ? '#555' : '#bbb') 
+              : (isDarkMode ? '#fff' : theme.main)
+          }]}>▶</Text>
+        </TouchableOpacity>
+      </View>
       
       <TouchableOpacity
         style={[styles.skipButton, { 
@@ -411,6 +451,38 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 16,
   },
+  cardContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  arrowButton: {
+    position: 'absolute',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    borderWidth: 1,
+  },
+  leftArrow: {
+    left: 5,
+  },
+  rightArrow: {
+    right: 5,
+  },
+  arrowText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  }
 });
 
 export default ReviewScreen; 
