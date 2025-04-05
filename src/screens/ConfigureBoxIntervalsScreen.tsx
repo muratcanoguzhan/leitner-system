@@ -13,8 +13,10 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { LearningSession, BoxIntervals } from '../models/Card';
 import { getSession, DEFAULT_BOX_INTERVALS, saveSession } from '../utils/storage';
-import { AppTheme, BOX_THEMES } from '../utils/themes';
+import { BOX_THEMES, DARK_BOX_THEMES, AppTheme } from '../utils/themes';
 import BackButton from '../components/BackButton';
+import { useTheme } from '../utils/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -36,6 +38,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
   const [boxIntervals, setBoxIntervals] = useState<BoxIntervals>(DEFAULT_BOX_INTERVALS);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const { theme, isDarkMode } = useTheme();
 
   useEffect(() => {
     const loadSessionData = async () => {
@@ -127,9 +130,12 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.main }]}>
+          <Text style={[styles.title, { color: isDarkMode ? '#000' : '#fff' }]}>Configure Review Intervals</Text>
+        </View>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={[styles.loadingText, { color: theme.text.dark }]}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
@@ -137,149 +143,195 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
 
   if (!session) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.main }]}>
+          <Text style={[styles.title, { color: isDarkMode ? '#000' : '#fff' }]}>Configure Review Intervals</Text>
+        </View>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Session not found</Text>
+          <Text style={[styles.errorText, { color: theme.text.dark }]}>Session not found</Text>
           <TouchableOpacity 
-            style={styles.button}
+            style={[styles.floatingSaveButton, { backgroundColor: theme.main }]}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.buttonText}>Go Back</Text>
+            <Text style={[styles.floatingSaveButtonText, { color: isDarkMode ? '#000' : '#fff' }]}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
+  // Get the appropriate box themes based on current theme mode
+  const boxThemes = isDarkMode ? DARK_BOX_THEMES : BOX_THEMES;
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.main }]}>
         <BackButton 
           onPress={() => navigation.goBack()}
           style={styles.backButtonIcon}
         />
-        <Text style={styles.title}>Configure Review Intervals</Text>
+        <Text style={[styles.title, { color: isDarkMode ? '#000' : '#fff' }]}>Configure Review Intervals</Text>
+        <ThemeToggle style={styles.themeToggle} />
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.sessionName}>{session.name}</Text>
-        <Text style={styles.description}>
+        <Text style={[styles.sessionName, { color: theme.text.dark }]}>{session.name}</Text>
+        <Text style={[styles.description, { color: theme.text.light }]}>
           Customize the number of days between reviews for each box. 
           Higher box numbers should have longer intervals.
         </Text>
 
-        <View style={styles.intervalContainer}>
+        <View style={[styles.intervalContainer, { 
+          backgroundColor: theme.white,
+          shadowColor: isDarkMode ? '#fff' : '#000',
+          shadowOpacity: isDarkMode ? 0.05 : 0.1
+        }]}>
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
-            borderLeftColor: BOX_THEMES[1].header,
-            backgroundColor: BOX_THEMES[1].bg + '40'
+            borderLeftColor: boxThemes[1].header,
+            backgroundColor: boxThemes[1].bg + (isDarkMode ? '80' : '40')
           }]}>
-            <Text style={styles.boxLabel}>
-              <Text>{BOX_THEMES[1].icon} </Text>
+            <Text style={[styles.boxLabel, { color: theme.text.dark }]}>
+              <Text>{boxThemes[1].icon} </Text>
               Box 1:
             </Text>
             <TextInput
-              style={[styles.input, { borderColor: BOX_THEMES[1].border }]}
+              style={[styles.input, { 
+                borderColor: boxThemes[1].border,
+                backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
+                color: theme.text.dark
+              }]}
               keyboardType="numeric"
               value={boxIntervals.box1Days.toString()}
               onChangeText={(value) => handleInputChange('box1Days', value)}
               placeholder="Days"
+              placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
             />
-            <Text style={styles.daysText}>days</Text>
+            <Text style={[styles.daysText, { color: theme.text.light }]}>days</Text>
           </View>
 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
-            borderLeftColor: BOX_THEMES[2].header,
-            backgroundColor: BOX_THEMES[2].bg + '40'
+            borderLeftColor: boxThemes[2].header,
+            backgroundColor: boxThemes[2].bg + (isDarkMode ? '80' : '40')
           }]}>
-            <Text style={styles.boxLabel}>
-              <Text>{BOX_THEMES[2].icon} </Text>
+            <Text style={[styles.boxLabel, { color: theme.text.dark }]}>
+              <Text>{boxThemes[2].icon} </Text>
               Box 2:
             </Text>
             <TextInput
-              style={[styles.input, { borderColor: BOX_THEMES[2].border }]}
+              style={[styles.input, { 
+                borderColor: boxThemes[2].border,
+                backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
+                color: theme.text.dark
+              }]}
               keyboardType="numeric"
               value={boxIntervals.box2Days.toString()}
               onChangeText={(value) => handleInputChange('box2Days', value)}
               placeholder="Days"
+              placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
             />
-            <Text style={styles.daysText}>days</Text>
+            <Text style={[styles.daysText, { color: theme.text.light }]}>days</Text>
           </View>
 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
-            borderLeftColor: BOX_THEMES[3].header,
-            backgroundColor: BOX_THEMES[3].bg + '40'
+            borderLeftColor: boxThemes[3].header,
+            backgroundColor: boxThemes[3].bg + (isDarkMode ? '80' : '40')
           }]}>
-            <Text style={styles.boxLabel}>
-              <Text>{BOX_THEMES[3].icon} </Text>
+            <Text style={[styles.boxLabel, { color: theme.text.dark }]}>
+              <Text>{boxThemes[3].icon} </Text>
               Box 3:
             </Text>
             <TextInput
-              style={[styles.input, { borderColor: BOX_THEMES[3].border }]}
+              style={[styles.input, { 
+                borderColor: boxThemes[3].border,
+                backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
+                color: theme.text.dark
+              }]}
               keyboardType="numeric"
               value={boxIntervals.box3Days.toString()}
               onChangeText={(value) => handleInputChange('box3Days', value)}
               placeholder="Days"
+              placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
             />
-            <Text style={styles.daysText}>days</Text>
+            <Text style={[styles.daysText, { color: theme.text.light }]}>days</Text>
           </View>
 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
-            borderLeftColor: BOX_THEMES[4].header,
-            backgroundColor: BOX_THEMES[4].bg + '40'
+            borderLeftColor: boxThemes[4].header,
+            backgroundColor: boxThemes[4].bg + (isDarkMode ? '80' : '40')
           }]}>
-            <Text style={styles.boxLabel}>
-              <Text>{BOX_THEMES[4].icon} </Text>
+            <Text style={[styles.boxLabel, { color: theme.text.dark }]}>
+              <Text>{boxThemes[4].icon} </Text>
               Box 4:
             </Text>
             <TextInput
-              style={[styles.input, { borderColor: BOX_THEMES[4].border }]}
+              style={[styles.input, { 
+                borderColor: boxThemes[4].border,
+                backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
+                color: theme.text.dark
+              }]}
               keyboardType="numeric"
               value={boxIntervals.box4Days.toString()}
               onChangeText={(value) => handleInputChange('box4Days', value)}
               placeholder="Days"
+              placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
             />
-            <Text style={styles.daysText}>days</Text>
+            <Text style={[styles.daysText, { color: theme.text.light }]}>days</Text>
           </View>
 
           <View style={[styles.intervalRow, { 
             borderLeftWidth: 4, 
-            borderLeftColor: BOX_THEMES[5].header,
-            backgroundColor: BOX_THEMES[5].bg + '40'
+            borderLeftColor: boxThemes[5].header,
+            backgroundColor: boxThemes[5].bg + (isDarkMode ? '80' : '40')
           }]}>
-            <Text style={styles.boxLabel}>
-              <Text>{BOX_THEMES[5].icon} </Text>
+            <Text style={[styles.boxLabel, { color: theme.text.dark }]}>
+              <Text>{boxThemes[5].icon} </Text>
               Box 5:
             </Text>
             <TextInput
-              style={[styles.input, { borderColor: BOX_THEMES[5].border }]}
+              style={[styles.input, { 
+                borderColor: boxThemes[5].border,
+                backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.8)',
+                color: theme.text.dark
+              }]}
               keyboardType="numeric"
               value={boxIntervals.box5Days.toString()}
               onChangeText={(value) => handleInputChange('box5Days', value)}
               placeholder="Days"
+              placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
             />
-            <Text style={styles.daysText}>days</Text>
+            <Text style={[styles.daysText, { color: theme.text.light }]}>days</Text>
           </View>
         </View>
       </ScrollView>
 
       <TouchableOpacity 
-        style={styles.resetButton}
+        style={[styles.resetButton, { 
+          backgroundColor: isDarkMode ? '#333' : '#f0f0f0',
+          borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+          shadowColor: isDarkMode ? '#fff' : '#000',
+          shadowOpacity: isDarkMode ? 0.1 : 0.25,
+        }]}
         onPress={resetToDefaults}
       >
-        <Text style={styles.resetButtonText}>Reset</Text>
+        <Text style={[styles.resetButtonText, { color: isDarkMode ? '#bbb' : AppTheme.text.light }]}>Reset</Text>
       </TouchableOpacity>
 
       <TouchableOpacity 
-        style={styles.floatingSaveButton}
+        style={[styles.floatingSaveButton, { 
+          backgroundColor: theme.main,
+          borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.3)',
+          shadowColor: isDarkMode ? '#fff' : '#000',
+          shadowOpacity: isDarkMode ? 0.1 : 0.25,
+        }]}
         onPress={saveIntervals}
         disabled={isSaving}
         activeOpacity={0.7}
       >
-        <Text style={styles.floatingSaveButtonText}>
+        <Text style={[styles.floatingSaveButtonText, { color: isDarkMode ? '#000' : AppTheme.text.dark }]}>
           {isSaving ? '...' : '✓'}
         </Text>
       </TouchableOpacity>
@@ -290,16 +342,13 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
     paddingVertical: 25,
-    backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     elevation: 4,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -315,7 +364,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: AppTheme.white,
   },
   content: {
     flex: 1,
@@ -324,22 +372,18 @@ const styles = StyleSheet.create({
   sessionName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: AppTheme.text.dark,
     marginBottom: 10,
   },
   description: {
     fontSize: 16,
-    color: AppTheme.text.light,
     marginBottom: 20,
     lineHeight: 22,
   },
   intervalContainer: {
-    backgroundColor: AppTheme.white,
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
     elevation: 2,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
@@ -358,16 +402,13 @@ const styles = StyleSheet.create({
     width: 100,
     fontSize: 16,
     fontWeight: 'bold',
-    color: AppTheme.text.dark,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
   },
   input: {
     width: 80,
-    backgroundColor: '#f8f8f8',
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 6,
     padding: 8,
     fontSize: 16,
@@ -376,33 +417,12 @@ const styles = StyleSheet.create({
   daysText: {
     marginLeft: 10,
     fontSize: 16,
-    color: AppTheme.text.light,
   },
-  floatingSaveButton: {
+  themeToggle: {
     position: 'absolute',
-    bottom: 25,
-    right: 25,
-    backgroundColor: AppTheme.main,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    zIndex: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  floatingSaveButtonText: {
-    color: AppTheme.text.dark,
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    lineHeight: 46,
+    right: 10,
+    top: 10,
+    zIndex: 10,
   },
   resetButton: {
     position: 'absolute',
@@ -430,6 +450,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  floatingSaveButton: {
+    position: 'absolute',
+    bottom: 25,
+    right: 25,
+    backgroundColor: AppTheme.main,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    zIndex: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  floatingSaveButtonText: {
+    color: AppTheme.text.dark,
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    lineHeight: 46,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -437,7 +483,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: AppTheme.text.light,
+    marginTop: 10,
   },
   errorContainer: {
     flex: 1,
@@ -447,19 +493,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: AppTheme.danger,
     marginBottom: 20,
-  },
-  button: {
-    backgroundColor: AppTheme.main,
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: AppTheme.white,
-    fontWeight: 'bold',
-    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

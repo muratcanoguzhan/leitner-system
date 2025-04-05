@@ -9,6 +9,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { initDatabase } from './src/utils/database';
 import { Alert, ActivityIndicator, View, Text, Button } from 'react-native';
+import { ThemeProvider } from './src/utils/ThemeContext';
 
 function App(): React.JSX.Element {
   const [isReady, setIsReady] = useState(false);
@@ -67,11 +68,13 @@ function App(): React.JSX.Element {
   }
   
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AppNavigator />
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AppNavigator />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ThemeProvider>
   );
 }
 

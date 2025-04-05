@@ -15,6 +15,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
+import ThemeToggle from '../components/ThemeToggle';
+import { useTheme } from '../utils/ThemeContext';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -36,6 +38,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   const [allCards, setAllCards] = useState<Card[]>([]);
   const [boxCards, setBoxCards] = useState<Card[]>([]);
   const [session, setSession] = useState<LearningSession | null>(null);
+  const { theme, isDarkMode } = useTheme();
 
   const loadCardData = useCallback(async () => {
     const loadedCards = await getCardsForSession(sessionId);
@@ -93,26 +96,31 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   };
 
   const renderCardItem = ({ item }: { item: Card }) => {
-    const theme = getBoxTheme(boxLevel);
+    const boxTheme = getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light');
     
     return (
-      <View style={[AppStyles.list.item, { borderLeftColor: theme.border }]}>
+      <View style={[AppStyles.list.item, { 
+        borderLeftColor: boxTheme.border,
+        backgroundColor: theme.white,
+        shadowColor: isDarkMode ? '#fff' : '#000',
+        shadowOpacity: isDarkMode ? 0.05 : 0.1
+      }]}>
         <View style={styles.cardContent}>
-          <Text style={AppStyles.text.title}>{item.front}</Text>
-          <Text style={AppStyles.text.subtitle}>{item.back}</Text>
+          <Text style={[AppStyles.text.title, { color: theme.text.dark }]}>{item.front}</Text>
+          <Text style={[AppStyles.text.subtitle, { color: theme.text.light }]}>{item.back}</Text>
         </View>
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
-            style={[AppStyles.button.primary, styles.actionButton]}
+            style={[AppStyles.button.primary, styles.actionButton, { backgroundColor: theme.main }]}
             onPress={() => navigation.navigate('EditCard', { cardId: item.id })}
           >
-            <Text style={AppStyles.button.primaryText}>Edit</Text>
+            <Text style={[AppStyles.button.primaryText, { color: isDarkMode ? '#000' : '#fff' }]}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[AppStyles.button.danger, styles.actionButton]}
             onPress={() => handleDeleteCard(item.id)}
           >
-            <Text style={AppStyles.button.primaryText}>Delete</Text>
+            <Text style={[AppStyles.button.primaryText, { color: '#fff' }]}>Delete</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -152,23 +160,28 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   };
 
   return (
-    <SafeAreaView style={AppStyles.container.main}>
-      <View style={[styles.header, { backgroundColor: getBoxTheme(boxLevel).header }]}>
+    <SafeAreaView style={[AppStyles.container.main, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light').header }]}>
         <BackButton 
           onPress={() => navigation.goBack()} 
           style={styles.backButtonIcon}
         />
         <View style={styles.headerContent}>
-          <Text style={styles.boxIcon}>{getBoxTheme(boxLevel).icon}</Text>
+          <Text style={[styles.boxIcon, { color: isDarkMode ? '#fff' : '#fff' }]}>{getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light').icon}</Text>
           <View>
-            <Text style={styles.title}>Box {boxLevel}</Text>
-            <Text style={styles.subtitle}>{getBoxDescription()}</Text>
+            <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#fff' }]}>Box {boxLevel}</Text>
+            <Text style={[styles.subtitle, { color: isDarkMode ? '#eee' : '#f0f0f0' }]}>{getBoxDescription()}</Text>
           </View>
         </View>
+        <ThemeToggle style={styles.themeToggle} />
       </View>
 
-      <View style={AppStyles.stats.container}>
-        <Text style={AppStyles.text.regular}>
+      <View style={[AppStyles.stats.container, {
+        backgroundColor: theme.white,
+        shadowColor: isDarkMode ? '#fff' : '#000',
+        shadowOpacity: isDarkMode ? 0.05 : 0.1
+      }]}>
+        <Text style={[AppStyles.text.regular, { color: theme.text.dark }]}>
           {boxCards.length} {boxCards.length === 1 ? 'card' : 'cards'} in this box
         </Text>
       </View>
@@ -182,8 +195,8 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         />
       ) : (
         <View style={AppStyles.loading.container}>
-          <Text style={[AppStyles.text.title, { marginBottom: 12 }]}>No cards in this box yet.</Text>
-          <Text style={[AppStyles.text.subtitle, { textAlign: 'center', lineHeight: 24 }]}>
+          <Text style={[AppStyles.text.title, { marginBottom: 12, color: theme.text.dark }]}>No cards in this box yet.</Text>
+          <Text style={[AppStyles.text.subtitle, { textAlign: 'center', lineHeight: 24, color: theme.text.light }]}>
             Add cards from the home screen and they'll appear here as they move through the session.
           </Text>
         </View>
@@ -193,55 +206,114 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   header: {
     padding: 20,
     paddingVertical: 25,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     elevation: 4,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     position: 'relative',
-    alignItems: 'center',
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  boxIcon: {
-    fontSize: 32,
-    marginRight: 15,
-    color: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#fff',
-    opacity: 0.9,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionButton: {
-    padding: 10,
-    marginLeft: 5,
   },
   backButtonIcon: {
     position: 'absolute',
     top: 15,
     left: 15,
     zIndex: 10,
+  },
+  themeToggle: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    zIndex: 10,
+  },
+  boxIcon: {
+    fontSize: 26,
+    marginRight: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  statsContainer: {
+    marginHorizontal: 20,
+    marginTop: 20,
+    padding: 15,
+    borderRadius: 10,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+  },
+  statsText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  listContainer: {
+    padding: 20,
+  },
+  card: {
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 15,
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 2,
+  },
+  cardContent: {
+    marginBottom: 10,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  cardSubtitle: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  actionButton: {
+    padding: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  actionButtonText: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
 

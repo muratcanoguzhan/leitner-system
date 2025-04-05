@@ -12,6 +12,8 @@ export type BoxThemes = {
   [key: number]: BoxTheme;
 };
 
+export type ThemeMode = 'light' | 'dark';
+
 // App-wide theme colors
 export const AppTheme = {
   main: '#ffcc00',      // Main app color (changed from #4ecdc4)
@@ -25,6 +27,26 @@ export const AppTheme = {
   danger: '#ff6b6b',
   success: '#66cc66',
   yellow: '#ffcc00',   // Yellow color for highlights and buttons
+};
+
+// Dark mode theme colors
+export const DarkAppTheme = {
+  main: '#ffcc00',      // Keep the main accent color
+  background: '#121212',
+  text: {
+    dark: '#ffffff',    // Make this white for better contrast
+    medium: '#e0e0e0',    // Lighter gray for better visibility
+    light: '#b0b0b0',    // Medium light gray for secondary text
+  },
+  white: '#1e1e1e',     // This is now dark
+  danger: '#ff6b6b',    // Keep same danger color
+  success: '#66cc66',   // Keep same success color
+  yellow: '#ffcc00',    // Keep same yellow
+};
+
+// Get current theme based on mode
+export const getTheme = (mode: ThemeMode) => {
+  return mode === 'light' ? AppTheme : DarkAppTheme;
 };
 
 // Central definition of box themes
@@ -61,244 +83,288 @@ export const BOX_THEMES: BoxThemes = {
   }
 };
 
+// Dark mode box themes
+export const DARK_BOX_THEMES: BoxThemes = {
+  1: { 
+    bg: '#3a1f1f', 
+    border: '#cc3333',    // Brighter border
+    header: '#801a1a', 
+    icon: '🔄'        // Red theme - daily review (darker)
+  },  
+  2: { 
+    bg: '#332717', 
+    border: '#cc8833',    // Brighter border
+    header: '#995c12', 
+    icon: '🕒'        // Orange theme - short interval (darker)
+  },  
+  3: { 
+    bg: '#172331', 
+    border: '#3377cc',    // Brighter border
+    header: '#19497d', 
+    icon: '📋'        // Blue theme - medium interval (darker)
+  },  
+  4: { 
+    bg: '#221e33', 
+    border: '#6633cc',    // Brighter border
+    header: '#3d2980', 
+    icon: '📘'        // Purple theme - longer interval (darker)
+  },  
+  5: { 
+    bg: '#1c331c', 
+    border: '#33cc33',    // Brighter border
+    header: '#1f661f', 
+    icon: '🏆'        // Green theme - mastery (darker)
+  }
+};
+
 // Helper function to get theme for a specific box level
-export const getBoxTheme = (level: number): BoxTheme => {
+export const getBoxTheme = (level: number, mode: ThemeMode = 'light'): BoxTheme => {
+  const themes = mode === 'light' ? BOX_THEMES : DARK_BOX_THEMES;
   // Return the theme for the level, or default to the theme for level 1 if not found
-  return BOX_THEMES[level] || BOX_THEMES[1];
+  return themes[level] || themes[1];
 };
 
 // Application-wide component styling system
-export const AppStyles = {
-  // Containers
-  container: {
-    main: {
-      flex: 1,
-      backgroundColor: AppTheme.background,
-    } as ViewStyle,
-    card: {
-      backgroundColor: AppTheme.white,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 15,
-      elevation: 3,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 3,
-    } as ViewStyle,
-    modal: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    } as ViewStyle,
-    modalContent: {
-      backgroundColor: AppTheme.white,
-      borderRadius: 10,
-      padding: 20,
-      width: '80%',
-      elevation: 5,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-    } as ViewStyle,
-  },
+export const getAppStyles = (mode: ThemeMode) => {
+  const theme = getTheme(mode);
   
-  // Headers
-  header: {
-    main: {
-      padding: 20,
-      backgroundColor: AppTheme.main,
-      borderBottomLeftRadius: 15,
-      borderBottomRightRadius: 15,
-      elevation: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-    } as ViewStyle,
-    content: {
-      alignItems: 'center',
-      paddingVertical: 5,
-    } as ViewStyle,
-  },
-  
-  // Text styles
-  text: {
-    title: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: AppTheme.text.dark,
-    } as TextStyle,
-    subtitle: {
-      fontSize: 16,
-      color: AppTheme.text.light,
-    } as TextStyle,
+  return {
+    // Containers
+    container: {
+      main: {
+        flex: 1,
+        backgroundColor: theme.background,
+      } as ViewStyle,
+      card: {
+        backgroundColor: theme.white,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 15,
+        elevation: 3,
+        shadowColor: mode === 'light' ? '#000' : '#fff',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: mode === 'light' ? 0.1 : 0.05,
+        shadowRadius: 3,
+      } as ViewStyle,
+      modal: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: mode === 'light' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.7)',
+      } as ViewStyle,
+      modalContent: {
+        backgroundColor: theme.white,
+        borderRadius: 10,
+        padding: 20,
+        width: '80%',
+        elevation: 5,
+        shadowColor: mode === 'light' ? '#000' : '#fff',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: mode === 'light' ? 0.25 : 0.15,
+        shadowRadius: 3.84,
+      } as ViewStyle,
+    },
+    
+    // Headers
     header: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: AppTheme.white,
-      textAlign: 'center',
-    } as TextStyle,
-    modalTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 20,
-      color: AppTheme.text.dark,
-      textAlign: 'center',
-    } as TextStyle,
-    regular: {
-      fontSize: 16, 
-      color: AppTheme.text.medium,
-    } as TextStyle,
-    small: {
-      fontSize: 14, 
-      color: AppTheme.text.light,
-    } as TextStyle,
-  },
-  
-  // Form elements
-  form: {
-    input: {
-      backgroundColor: AppTheme.white,
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 16,
-    } as TextStyle,
-    label: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 8,
-      color: AppTheme.text.dark,
-    } as TextStyle,
-    textArea: {
-      backgroundColor: AppTheme.white,
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 16,
-      minHeight: 100,
-      textAlignVertical: 'top',
-    } as TextStyle,
-  },
-  
-  // Buttons
-  button: {
-    primary: {
-      backgroundColor: AppTheme.main,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    } as ViewStyle,
-    secondary: {
-      backgroundColor: '#ddd',
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    } as ViewStyle,
-    danger: {
-      backgroundColor: AppTheme.danger,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    } as ViewStyle,
-    success: {
-      backgroundColor: AppTheme.success,
-      paddingVertical: 12,
-      paddingHorizontal: 16, 
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    } as ViewStyle,
-    primaryText: {
-      color: AppTheme.white,
-      fontWeight: 'bold',
-      fontSize: 16,
-    } as TextStyle,
-    secondaryText: {
-      color: AppTheme.text.dark,
-      fontWeight: 'bold',
-      fontSize: 16,
-    } as TextStyle,
-    disabled: {
-      opacity: 0.7,
-    } as ViewStyle,
-  },
-  
-  // Lists and stats
-  list: {
-    container: {
-      padding: 20,
-    } as ViewStyle,
-    item: {
-      backgroundColor: AppTheme.white,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 12,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-      borderLeftWidth: 4,
-    } as ViewStyle,
-  },
-  
-  // Stats display
-  stats: {
-    container: {
-      backgroundColor: AppTheme.white,
-      borderRadius: 15,
-      padding: 15,
-      marginVertical: 10,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 3,
-    } as ViewStyle,
-    row: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    } as ViewStyle,
-    item: {
-      alignItems: 'center',
-      padding: 12,
-    } as ViewStyle,
-    value: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: AppTheme.text.dark,
-    } as TextStyle,
-    label: {
-      fontSize: 14,
-      color: AppTheme.text.light,
-      marginTop: 4,
-    } as TextStyle,
-  },
-  
-  // Loading states
-  loading: {
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    } as ViewStyle,
+      main: {
+        padding: 20,
+        backgroundColor: theme.main,
+        borderBottomLeftRadius: 15,
+        borderBottomRightRadius: 15,
+        elevation: 4,
+        shadowColor: mode === 'light' ? '#000' : '#fff',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: mode === 'light' ? 0.2 : 0.1,
+        shadowRadius: 4,
+      } as ViewStyle,
+      content: {
+        alignItems: 'center',
+        paddingVertical: 5,
+      } as ViewStyle,
+    },
+    
+    // Text styles
     text: {
-      fontSize: 16,
-      color: AppTheme.text.light,
-      marginTop: 10,
-    } as TextStyle,
-  },
-}; 
+      title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: theme.text.dark,
+      } as TextStyle,
+      subtitle: {
+        fontSize: 16,
+        color: theme.text.light,
+      } as TextStyle,
+      header: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: mode === 'light' ? theme.white : theme.text.dark,
+        textAlign: 'center',
+      } as TextStyle,
+      modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        color: theme.text.dark,
+        textAlign: 'center',
+      } as TextStyle,
+      regular: {
+        fontSize: 16, 
+        color: theme.text.medium,
+      } as TextStyle,
+      small: {
+        fontSize: 14, 
+        color: theme.text.light,
+      } as TextStyle,
+    },
+    
+    // Form elements
+    form: {
+      input: {
+        backgroundColor: theme.white,
+        borderWidth: 1,
+        borderColor: mode === 'light' ? '#ddd' : '#444',
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 16,
+        color: theme.text.dark,
+      } as TextStyle,
+      label: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 8,
+        color: theme.text.dark,
+      } as TextStyle,
+      textArea: {
+        backgroundColor: theme.white,
+        borderWidth: 1,
+        borderColor: mode === 'light' ? '#ddd' : '#444',
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 16,
+        minHeight: 100,
+        textAlignVertical: 'top',
+        color: theme.text.dark,
+      } as TextStyle,
+    },
+    
+    // Buttons
+    button: {
+      primary: {
+        backgroundColor: theme.main,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+      } as ViewStyle,
+      secondary: {
+        backgroundColor: mode === 'light' ? '#ddd' : '#444',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+      } as ViewStyle,
+      danger: {
+        backgroundColor: theme.danger,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+      } as ViewStyle,
+      success: {
+        backgroundColor: theme.success,
+        paddingVertical: 12,
+        paddingHorizontal: 16, 
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+      } as ViewStyle,
+      primaryText: {
+        color: mode === 'light' ? theme.white : theme.text.dark,
+        fontWeight: 'bold',
+        fontSize: 16,
+      } as TextStyle,
+      secondaryText: {
+        color: theme.text.dark,
+        fontWeight: 'bold',
+        fontSize: 16,
+      } as TextStyle,
+      disabled: {
+        opacity: 0.7,
+      } as ViewStyle,
+    },
+    
+    // Lists and stats
+    list: {
+      container: {
+        padding: 20,
+      } as ViewStyle,
+      item: {
+        backgroundColor: theme.white,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        elevation: 2,
+        shadowColor: mode === 'light' ? '#000' : '#fff',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: mode === 'light' ? 0.1 : 0.05,
+        shadowRadius: 2,
+        borderLeftWidth: 4,
+      } as ViewStyle,
+    },
+    
+    // Stats display
+    stats: {
+      container: {
+        backgroundColor: theme.white,
+        borderRadius: 15,
+        padding: 15,
+        marginVertical: 10,
+        elevation: 2,
+        shadowColor: mode === 'light' ? '#000' : '#fff',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: mode === 'light' ? 0.1 : 0.05,
+        shadowRadius: 3,
+      } as ViewStyle,
+      row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      } as ViewStyle,
+      item: {
+        alignItems: 'center',
+        padding: 12,
+      } as ViewStyle,
+      value: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: theme.text.dark,
+      } as TextStyle,
+      label: {
+        fontSize: 14,
+        color: theme.text.light,
+        marginTop: 4,
+      } as TextStyle,
+    },
+    
+    // Loading states
+    loading: {
+      container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      } as ViewStyle,
+      text: {
+        fontSize: 16,
+        color: theme.text.light,
+        marginTop: 10,
+      } as TextStyle,
+    },
+  };
+};
+
+// Default styles with light theme
+export const AppStyles = getAppStyles('light'); 

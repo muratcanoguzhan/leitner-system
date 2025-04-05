@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
 import { LearningSession } from '../models/Card';
 import { getCardsForSession, loadSessions } from '../utils/storage';
-import { getBoxTheme, AppTheme } from '../utils/themes';
+import { getBoxTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import FloatingAddButton from '../components/FloatingAddButton';
 import BackButton from '../components/BackButton';
 import { SessionStats, getSessionStats } from '../services/StatisticsService';
+import { useTheme } from '../utils/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -32,6 +34,7 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLandscape, setIsLandscape] = useState(false);
+  const { theme, isDarkMode } = useTheme();
 
   // Check orientation
   const checkOrientation = () => {
@@ -91,7 +94,7 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
     let reviewText = '';
     
     // Get theme from shared utility
-    const theme = getBoxTheme(boxLevel);
+    const boxTheme = getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light');
     
     // Use the session's custom box intervals if available
     if (session && session.boxIntervals) {
@@ -133,8 +136,8 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
         style={[
           styles.boxItem, 
           { 
-            backgroundColor: theme.bg,
-            borderColor: theme.border,
+            backgroundColor: boxTheme.bg,
+            borderColor: boxTheme.border,
             borderWidth: 1,
           },
           isLandscape && styles.boxItemLandscape
@@ -142,75 +145,103 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
         onPress={() => navigation.navigate('BoxDetails', { boxLevel, sessionId })}
       >
         <View style={styles.boxHeader}>
-          <Text style={styles.boxIcon}>{theme.icon}</Text>
-          <Text style={[styles.boxTitle, isLandscape && styles.boxTitleLandscape]}>{`Box ${boxLevel}`}</Text>
+          <Text style={styles.boxIcon}>{boxTheme.icon}</Text>
+          <Text style={[
+            styles.boxTitle, 
+            isLandscape && styles.boxTitleLandscape,
+            { color: isDarkMode ? '#fff' : '#333' }
+          ]}>{`Box ${boxLevel}`}</Text>
         </View>
-        <Text style={[styles.boxCount, isLandscape && styles.boxCountLandscape]}>
+        <Text style={[
+          styles.boxCount, 
+          isLandscape && styles.boxCountLandscape,
+          { color: isDarkMode ? '#fff' : '#555' }
+        ]}>
           {sessionStats ? sessionStats.boxCounts[index] : 0} cards
         </Text>
-        <Text style={[styles.boxDescription, isLandscape && styles.boxDescriptionLandscape]}>{reviewText}</Text>
+        <Text style={[
+          styles.boxDescription, 
+          isLandscape && styles.boxDescriptionLandscape,
+          { color: isDarkMode ? '#ddd' : '#666' }
+        ]}>{reviewText}</Text>
       </TouchableOpacity>
     );
   };
 
   if (!session || loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Loading...</Text>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.main }]}>
+          <Text style={[styles.title, { color: isDarkMode ? '#000' : '#fff' }]}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={[styles.header, isLandscape && styles.headerLandscape]}>
+        <View style={[styles.header, isLandscape && styles.headerLandscape, { backgroundColor: theme.main }]}>
           <BackButton 
             onPress={() => navigation.navigate('LearningSessions')}
             style={styles.backButtonIcon}
           />
           <View style={styles.headerContent}>
-            <Text style={[styles.title, isLandscape && styles.titleLandscape]}>{session.name}</Text>
-            <Text style={[styles.subtitle, isLandscape && styles.subtitleLandscape]}>Spaced Repetition Flashcards</Text>
+            <Text style={[styles.title, isLandscape && styles.titleLandscape, { color: isDarkMode ? '#000' : '#fff' }]}>
+              {session.name}
+            </Text>
+            <Text style={[styles.subtitle, isLandscape && styles.subtitleLandscape, { color: isDarkMode ? theme.text.light : '#f0f0f0' }]}>
+              Spaced Repetition Flashcards
+            </Text>
           </View>
+          <ThemeToggle style={styles.themeToggle} />
         </View>
 
-        <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape]}>
+        <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape, { 
+          backgroundColor: theme.white,
+          shadowColor: isDarkMode ? '#fff' : '#000',
+          shadowOpacity: isDarkMode ? 0.05 : 0.1
+        }]}>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>
+            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape, { color: theme.text.dark }]}>
               {sessionStats ? sessionStats.total : 0}
             </Text>
-            <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Total Cards</Text>
+            <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape, { color: theme.text.light }]}>
+              Total Cards
+            </Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>
+            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape, { color: theme.text.dark }]}>
               {sessionStats ? sessionStats.due : 0}
             </Text>
-            <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Due for Review</Text>
+            <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape, { color: theme.text.light }]}>
+              Due for Review
+            </Text>
           </View>
         </View>
 
         <View style={[styles.sectionHeader, isLandscape && styles.sectionHeaderLandscape]}>
-          <Text style={[styles.sectionTitle, isLandscape && styles.sectionTitleLandscape]}>Your Boxes</Text>
+          <Text style={[styles.sectionTitle, isLandscape && styles.sectionTitleLandscape, { color: theme.text.dark }]}>
+            Your Boxes
+          </Text>
           <TouchableOpacity 
-            style={[styles.configButton, isLandscape && styles.configButtonLandscape]}
+            style={[styles.configButton, isLandscape && styles.configButtonLandscape, { backgroundColor: theme.main }]}
             onPress={() => navigation.navigate('ConfigureBoxIntervals', { sessionId })}
           >
-            <Text style={[styles.configButtonText, isLandscape && styles.configButtonTextLandscape]}>Configure Intervals</Text>
+            <Text style={[styles.configButtonText, { 
+              color: isDarkMode ? '#000' : '#000',
+              fontWeight: 'bold'
+            }]}>Configure Intervals</Text>
           </TouchableOpacity>
         </View>
         
-        <View style={styles.boxesGrid}>
+        <View style={styles.boxesContainer}>
           {sessionStats && sessionStats.boxCounts.map((count, index) => (
             <React.Fragment key={`box-${index + 1}`}>
               {renderBoxItem({ item: count, index })}
             </React.Fragment>
           ))}
         </View>
-
-        <View style={styles.spacer} />
       </ScrollView>
       
       <FloatingAddButton 
@@ -219,10 +250,10 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
       
       {sessionStats && sessionStats.due > 0 && (
         <TouchableOpacity 
-          style={[styles.reviewFloatingButton]}
+          style={[styles.reviewFloatingButton, { backgroundColor: theme.danger }]}
           onPress={() => navigation.navigate('Review', { sessionId })}
         >
-          <Text style={styles.reviewFloatingButtonText}>Start Review</Text>
+          <Text style={[styles.reviewFloatingButtonText, { color: '#fff' }]}>Start Review</Text>
         </TouchableOpacity>
       )}
     </SafeAreaView>
@@ -232,270 +263,194 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppTheme.background,
   },
   scrollContent: {
-    flexGrow: 1,
+    paddingBottom: 80,
   },
   header: {
     padding: 20,
-    paddingVertical: 25,
-    backgroundColor: AppTheme.main,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
     position: 'relative',
-    alignItems: 'center',
   },
   headerContent: {
-    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 5,
   },
   headerLandscape: {
-    paddingHorizontal: 30,
-    paddingVertical: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   backButtonIcon: {
     position: 'absolute',
-    top: 15,
-    left: 15,
+    left: 10,
+    top: 10,
     zIndex: 10,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
     textAlign: 'center',
   },
   titleLandscape: {
-    fontSize: 22,
+    fontSize: 24,
+    textAlign: 'left',
+    marginLeft: 40,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#fff',
-    opacity: 0.9,
+    fontSize: 14,
     textAlign: 'center',
   },
   subtitleLandscape: {
-    fontSize: 14,
+    fontSize: 12,
+    textAlign: 'left',
+  },
+  themeToggle: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    zIndex: 10,
   },
   statsContainer: {
     flexDirection: 'row',
     marginTop: 20,
     marginHorizontal: 20,
-    backgroundColor: AppTheme.white,
     borderRadius: 15,
     elevation: 3,
-    shadowColor: '#000',
+    padding: 15,
+    justifyContent: 'space-around',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 3,
-    padding: 5,
   },
   statsContainerLandscape: {
-    marginTop: 10,
-    marginHorizontal: 15,
-    padding: 3,
+    marginTop: 15,
+    padding: 10,
   },
   statItem: {
-    flex: 1,
     alignItems: 'center',
-    paddingVertical: 15,
+    padding: 10,
   },
   statValue: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: AppTheme.text.dark,
   },
   statValueLandscape: {
-    fontSize: 20,
+    fontSize: 22,
   },
   statLabel: {
     fontSize: 14,
-    color: AppTheme.text.light,
     marginTop: 5,
     fontWeight: '500',
   },
   statLabelLandscape: {
     fontSize: 12,
-    marginTop: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    marginHorizontal: 20,
     marginTop: 25,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   sectionHeaderLandscape: {
-    paddingHorizontal: 15,
-    marginTop: 10,
-    marginBottom: 5,
+    marginTop: 15,
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: AppTheme.text.dark,
   },
   sectionTitleLandscape: {
     fontSize: 18,
   },
-  boxesGrid: {
-    paddingHorizontal: 20,
-  },
-  boxItem: {
-    backgroundColor: AppTheme.white,
-    borderRadius: 15,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  boxItemLandscape: {
-    padding: 12,
-    marginBottom: 8,
-  },
-  boxHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  boxIcon: {
-    fontSize: 24,
-    marginRight: 10,
-  },
-  boxTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: AppTheme.text.dark,
-  },
-  boxTitleLandscape: {
-    fontSize: 16,
-  },
-  boxCount: {
-    fontSize: 16,
-    color: AppTheme.text.medium,
-    marginTop: 6,
-    marginBottom: 2,
-  },
-  boxCountLandscape: {
-    fontSize: 14,
-    marginTop: 4,
-    marginBottom: 1,
-  },
-  boxDescription: {
-    fontSize: 14,
-    color: AppTheme.text.light,
-    marginTop: 5,
-  },
-  boxDescriptionLandscape: {
-    fontSize: 12,
-    marginTop: 3,
-  },
-  buttonContainer: {
-    padding: 20,
-    flexDirection: 'row',
-    backgroundColor: AppTheme.white,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  buttonContainerLandscape: {
-    padding: 10,
-    paddingHorizontal: 15,
-  },
-  button: {
-    flex: 1,
-    backgroundColor: AppTheme.main,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 5,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  buttonLandscape: {
-    padding: 12,
-    borderRadius: 10,
-  },
-  reviewButton: {
-    backgroundColor: AppTheme.danger,
-  },
-  buttonText: {
-    color: AppTheme.white,
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  buttonTextLandscape: {
-    fontSize: 14,
-  },
   configButton: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 10,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-  },
-  configButtonLandscape: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
     borderRadius: 8,
   },
+  configButtonLandscape: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
   configButtonText: {
-    color: AppTheme.text.medium,
     fontSize: 14,
     fontWeight: '500',
   },
   configButtonTextLandscape: {
     fontSize: 12,
   },
-  spacer: {
-    height: 100, // This adds space between boxes and buttons
+  boxesContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  boxItem: {
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 12,
+    width: '100%',
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  boxItemLandscape: {
+    padding: 12,
+  },
+  boxHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  boxIcon: {
+    fontSize: 22,
+    marginRight: 8,
+  },
+  boxTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  boxTitleLandscape: {
+    fontSize: 16,
+  },
+  boxCount: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  boxCountLandscape: {
+    fontSize: 14,
+  },
+  boxDescription: {
+    fontSize: 13,
+  },
+  boxDescriptionLandscape: {
+    fontSize: 12,
   },
   reviewFloatingButton: {
     position: 'absolute',
     bottom: 25,
     left: 25,
-    backgroundColor: AppTheme.danger,
     paddingVertical: 10,
     paddingHorizontal: 18,
-    borderRadius: 20,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 30,
     elevation: 4,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 3,
     zIndex: 999,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   reviewFloatingButtonText: {
-    color: AppTheme.white,
     fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
   },
 });
 

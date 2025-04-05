@@ -9,6 +9,7 @@ import BoxDetailsScreen from '../screens/BoxDetailsScreen';
 import LearningSessionsScreen from '../screens/LearningSessionsScreen';
 import ConfigureBoxIntervalsScreen from '../screens/ConfigureBoxIntervalsScreen';
 import EditCardScreen from '../screens/EditCardScreen';
+import {useTheme} from '../utils/ThemeContext';
 
 export type RootStackParamList = {
   LearningSessions: undefined;
@@ -23,13 +24,15 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
+  const {theme} = useTheme();
+  
   return (
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="LearningSessions"
         screenOptions={{
           headerShown: false,
-          contentStyle: {backgroundColor: '#f9f9f9'},
+          contentStyle: {backgroundColor: theme.background},
           animation: 'slide_from_right',
         }}>
         <Stack.Screen name="LearningSessions" component={LearningSessionsScreen} />

@@ -13,6 +13,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { AppTheme } from '../utils/themes';
 import { CardStats } from '../services/StatisticsService';
+import { useTheme } from '../utils/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -43,6 +45,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     demoted: 0,
     due: 0
   });
+  const { theme, isDarkMode } = useTheme();
 
   useEffect(() => {
     const loadCardData = async () => {
@@ -179,10 +182,14 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.main }]}>
+          <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Card Review</Text>
+          <ThemeToggle style={styles.themeToggle} />
+        </View>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>Loading...</Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptyTitle, { color: theme.text.dark }]}>Loading...</Text>
+          <Text style={[styles.emptySubtitle, { color: theme.text.light }]}>
             Checking for cards due for review.
           </Text>
         </View>
@@ -192,17 +199,21 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
 
   if (dueCards.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.main }]}>
+          <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Card Review</Text>
+          <ThemeToggle style={styles.themeToggle} />
+        </View>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>No Cards Due</Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptyTitle, { color: theme.text.dark }]}>No Cards Due</Text>
+          <Text style={[styles.emptySubtitle, { color: theme.text.light }]}>
             All caught up! There are no cards due for review.
           </Text>
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, { backgroundColor: theme.main }]}
             onPress={() => navigation.navigate('Boxes', { sessionId })}
           >
-            <Text style={styles.buttonText}>Back to Session</Text>
+            <Text style={[styles.buttonText, { color: isDarkMode ? '#000' : '#fff' }]}>Back to Session</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -213,67 +224,82 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     const { total, correct, incorrect, promoted, demoted } = reviewStats;
     
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.main }]}>
+          <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Review Complete</Text>
+          <ThemeToggle style={styles.themeToggle} />
+        </View>
         <View style={styles.completeContainer}>
-          <Text style={styles.completeTitle}>Review Complete!</Text>
+          <Text style={[styles.completeTitle, { color: theme.text.dark }]}>Review Complete!</Text>
           
-          <View style={styles.statsContainer}>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Total Cards Reviewed:</Text>
-              <Text style={styles.statValue}>{total}</Text>
+          <View style={[styles.statsContainer, { 
+            backgroundColor: theme.white,
+            shadowColor: isDarkMode ? '#fff' : '#000',
+            shadowOpacity: isDarkMode ? 0.05 : 0.1,
+            borderBottomColor: isDarkMode ? '#333' : '#f0f0f0'
+          }]}>
+            <View style={[styles.statRow, { borderBottomColor: isDarkMode ? '#333' : '#f0f0f0' }]}>
+              <Text style={[styles.statLabel, { color: theme.text.light }]}>Total Cards Reviewed:</Text>
+              <Text style={[styles.statValue, { color: theme.text.dark }]}>{total}</Text>
             </View>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Correct Answers:</Text>
-              <Text style={[styles.statValue, styles.correctText]}>{correct}</Text>
+            <View style={[styles.statRow, { borderBottomColor: isDarkMode ? '#333' : '#f0f0f0' }]}>
+              <Text style={[styles.statLabel, { color: theme.text.light }]}>Correct Answers:</Text>
+              <Text style={[styles.statValue, styles.correctText, { color: theme.success }]}>{correct}</Text>
             </View>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Incorrect Answers:</Text>
-              <Text style={[styles.statValue, styles.incorrectText]}>{incorrect}</Text>
+            <View style={[styles.statRow, { borderBottomColor: isDarkMode ? '#333' : '#f0f0f0' }]}>
+              <Text style={[styles.statLabel, { color: theme.text.light }]}>Incorrect Answers:</Text>
+              <Text style={[styles.statValue, styles.incorrectText, { color: theme.danger }]}>{incorrect}</Text>
             </View>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Cards Promoted:</Text>
-              <Text style={styles.statValue}>{promoted}</Text>
+            <View style={[styles.statRow, { borderBottomColor: isDarkMode ? '#333' : '#f0f0f0' }]}>
+              <Text style={[styles.statLabel, { color: theme.text.light }]}>Cards Promoted:</Text>
+              <Text style={[styles.statValue, { color: theme.text.dark }]}>{promoted}</Text>
             </View>
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Cards Demoted:</Text>
-              <Text style={styles.statValue}>{demoted}</Text>
+            <View style={[styles.statRow, { borderBottomColor: isDarkMode ? '#333' : '#f0f0f0' }]}>
+              <Text style={[styles.statLabel, { color: theme.text.light }]}>Cards Demoted:</Text>
+              <Text style={[styles.statValue, { color: theme.text.dark }]}>{demoted}</Text>
             </View>
           </View>
           
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, { 
+              backgroundColor: theme.main,
+              shadowColor: isDarkMode ? '#fff' : '#000',
+              shadowOpacity: isDarkMode ? 0.05 : 0.2
+            }]}
             onPress={handleFinish}
           >
-            <Text style={styles.buttonText}>Back to Session</Text>
+            <Text style={[styles.buttonText, { color: isDarkMode ? '#000' : '#fff' }]}>Back to Session</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
-  const currentCard = dueCards[currentCardIndex];
-  const progress = `${currentCardIndex + 1} / ${dueCards.length}`;
-
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Review Cards</Text>
-        <Text style={styles.progress}>{progress}</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.main }]}>
+        <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Card Review</Text>
+        <ThemeToggle style={styles.themeToggle} />
+      </View>
+      <View style={styles.progressContainer}>
+        <Text style={[styles.progressText, { color: theme.text.light }]}>
+          Card {currentCardIndex + 1} of {dueCards.length}
+        </Text>
       </View>
       
-      <View style={styles.cardContainer}>
-        <FlashCard
-          card={currentCard}
-          onCorrect={handleCorrect}
-          onIncorrect={handleIncorrect}
-        />
-      </View>
+      <FlashCard 
+        card={dueCards[currentCardIndex]} 
+        onCorrect={handleCorrect}
+        onIncorrect={handleIncorrect}
+      />
       
       <TouchableOpacity
-        style={styles.skipButton}
+        style={[styles.skipButton, { 
+          backgroundColor: isDarkMode ? '#333' : '#f0f0f0' 
+        }]}
         onPress={handleFinish}
       >
-        <Text style={styles.skipButtonText}>End Review</Text>
+        <Text style={[styles.skipButtonText, { color: theme.text.light }]}>End Review</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -282,7 +308,6 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
@@ -293,33 +318,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  title: {
+  headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: AppTheme.white,
   },
-  progress: {
-    fontSize: 16,
-    color: AppTheme.white,
-    opacity: 0.9,
-    fontWeight: '500',
-  },
-  cardContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  skipButton: {
-    padding: 15,
-    margin: 20,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    color: AppTheme.text.light,
-    fontWeight: '500',
+  themeToggle: {
+    // Add appropriate styles for the theme toggle component
   },
   emptyContainer: {
     flex: 1,
@@ -331,13 +335,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: AppTheme.text.dark,
   },
   emptySubtitle: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 30,
-    color: AppTheme.text.light,
   },
   completeContainer: {
     flex: 1,
@@ -349,7 +351,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: AppTheme.text.dark,
   },
   statsContainer: {
     backgroundColor: AppTheme.white,
@@ -372,12 +373,10 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 16,
-    color: AppTheme.text.light,
   },
   statValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: AppTheme.text.dark,
   },
   correctText: {
     color: AppTheme.main,
@@ -401,12 +400,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  scoreText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: AppTheme.main,
-    textAlign: 'center',
-    marginTop: 10,
+  progressContainer: {
+    padding: 20,
+  },
+  progressText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  skipButton: {
+    padding: 15,
+    margin: 20,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+  },
+  skipButtonText: {
+    fontWeight: '500',
+    fontSize: 16,
   },
 });
 

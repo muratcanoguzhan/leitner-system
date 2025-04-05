@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, Text, ViewStyle } from 'react-native';
-import { AppTheme } from '../utils/themes';
+import { useTheme } from '../utils/ThemeContext';
 
 interface FloatingAddButtonProps {
   onPress: () => void;
@@ -8,13 +8,22 @@ interface FloatingAddButtonProps {
 }
 
 const FloatingAddButton: React.FC<FloatingAddButtonProps> = ({ onPress, style }) => {
+  const { theme } = useTheme();
+  
   return (
     <TouchableOpacity 
-      style={[styles.addButton, style]} 
+      style={[
+        styles.addButton, 
+        { 
+          backgroundColor: theme.main,
+          borderColor: 'rgba(255, 255, 255, 0.3)',
+        },
+        style
+      ]} 
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <Text style={styles.addButtonText}>+</Text>
+      <Text style={[styles.addButtonText, { color: '#000' }]}>+</Text>
     </TouchableOpacity>
   );
 };
@@ -24,27 +33,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 25,
     right: 25,
-    backgroundColor: AppTheme.main,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
+    elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 3,
     zIndex: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 2,
   },
   addButtonText: {
-    color: AppTheme.text.dark,
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
-    lineHeight: 46,
+    lineHeight: 50,
   },
 });
 

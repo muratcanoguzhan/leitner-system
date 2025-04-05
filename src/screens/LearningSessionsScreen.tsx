@@ -20,9 +20,10 @@ import {
   DEFAULT_BOX_INTERVALS,
   updateLearningSession
 } from '../utils/storage';
-import { AppTheme } from '../utils/themes';
 import FloatingAddButton from '../components/FloatingAddButton';
 import { SessionStats, getSessionStats } from '../services/StatisticsService';
+import { useTheme } from '../utils/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -40,6 +41,7 @@ interface SessionWithStats extends LearningSession {
 }
 
 const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigation }) => {
+  const { theme, isDarkMode } = useTheme();
   const [sessions, setSessions] = useState<SessionWithStats[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newSessionName, setNewSessionName] = useState('');
@@ -178,18 +180,25 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
   const renderSessionItem = ({ item }: { item: SessionWithStats }) => {    
     return (
       <TouchableOpacity 
-        style={styles.sessionCard}
+        style={[styles.sessionCard, { 
+          backgroundColor: theme.white,
+          borderLeftColor: theme.main,
+          shadowColor: isDarkMode ? '#fff' : '#000',
+          shadowOpacity: isDarkMode ? 0.05 : 0.1,
+        }]}
         onPress={() => navigation.navigate('Boxes', { sessionId: item.id })}
       >
         <View style={styles.sessionInfo}>
-          <Text style={styles.sessionTitle}>{item.name}</Text>
-          <Text style={styles.sessionSubtitle}>
+          <Text style={[styles.sessionTitle, { color: theme.text.dark }]}>
+            {item.name}
+          </Text>
+          <Text style={[styles.sessionSubtitle, { color: theme.text.light }]}>
             Created: {new Date(item.createdAt).toLocaleDateString()}
           </Text>
           
           {item.stats && (
             <>
-              <Text style={styles.cardsTotalText}>
+              <Text style={[styles.cardsTotalText, { color: theme.text.dark }]}>
                 Cards: {item.stats.total} total
               </Text>
               <View style={styles.statsRow}>
@@ -224,24 +233,29 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.main }]}>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>My Learning Sessions</Text>
+          <Text style={[styles.title, { color: isDarkMode ? '#000' : '#fff' }]}>
+            My Learning Sessions
+          </Text>
+          <ThemeToggle style={styles.themeToggle} />
         </View>
       </View>
 
       {loadingStats ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={AppTheme.main} />
-          <Text style={styles.loadingText}>Loading sessions...</Text>
+          <ActivityIndicator size="large" color={theme.main} />
+          <Text style={[styles.loadingText, { color: theme.text.light }]}>
+            Loading sessions...
+          </Text>
         </View>
       ) : sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
+          <Text style={[styles.emptyText, { color: theme.text.dark }]}>
             You don't have any learning sessions yet.
           </Text>
-          <Text style={styles.emptySubText}>
+          <Text style={[styles.emptySubText, { color: theme.text.light }]}>
             Create your first one to get started!
           </Text>
         </View>
@@ -263,13 +277,22 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create New Learning Session</Text>
+        <View style={[styles.modalContainer, { 
+          backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)' 
+        }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.white }]}>
+            <Text style={[styles.modalTitle, { color: theme.text.dark }]}>
+              Create New Learning Session
+            </Text>
             
             <TextInput
-              style={styles.input}
+              style={[styles.input, { 
+                backgroundColor: theme.white, 
+                borderColor: isDarkMode ? '#444' : '#ddd',
+                color: theme.text.dark 
+              }]}
               placeholder="Enter a name for your session"
+              placeholderTextColor={theme.text.light}
               value={newSessionName}
               onChangeText={setNewSessionName}
               autoFocus
@@ -277,22 +300,28 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
             
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[styles.modalButton, styles.cancelButton, {
+                  backgroundColor: isDarkMode ? '#444' : '#ddd'
+                }]}
                 onPress={() => {
                   setModalVisible(false);
                   setNewSessionName('');
                 }}
                 disabled={isCreating}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={[styles.modalButtonText, { 
+                  color: isDarkMode ? theme.text.dark : '#000' 
+                }]}>Cancel</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[styles.modalButton, styles.createButton]}
+                style={[styles.modalButton, styles.createButton, {
+                  backgroundColor: theme.main
+                }]}
                 onPress={handleCreateSession}
                 disabled={isCreating}
               >
-                <Text style={styles.modalButtonText}>
+                <Text style={[styles.modalButtonText, { color: '#fff' }]}>
                   {isCreating ? 'Creating...' : 'Create'}
                 </Text>
               </TouchableOpacity>
@@ -308,13 +337,22 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
         visible={editModalVisible}
         onRequestClose={() => setEditModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Learning Session</Text>
+        <View style={[styles.modalContainer, { 
+          backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)' 
+        }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.white }]}>
+            <Text style={[styles.modalTitle, { color: theme.text.dark }]}>
+              Edit Learning Session
+            </Text>
             
             <TextInput
-              style={styles.input}
+              style={[styles.input, { 
+                backgroundColor: theme.white, 
+                borderColor: isDarkMode ? '#444' : '#ddd',
+                color: theme.text.dark 
+              }]}
               placeholder="Enter a new name for your session"
+              placeholderTextColor={theme.text.light}
               value={editedName}
               onChangeText={setEditedName}
               autoFocus
@@ -322,20 +360,28 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
             
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[styles.modalButton, styles.cancelButton, {
+                  backgroundColor: isDarkMode ? '#444' : '#ddd'
+                }]}
                 onPress={() => {
                   setEditModalVisible(false);
                   setEditingSession(null);
                 }}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={[styles.modalButtonText, { 
+                  color: isDarkMode ? theme.text.dark : '#000' 
+                }]}>Cancel</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[styles.modalButton, styles.createButton]}
+                style={[styles.modalButton, styles.createButton, {
+                  backgroundColor: theme.main
+                }]}
                 onPress={handleUpdateSession}
               >
-                <Text style={styles.modalButtonText}>Update</Text>
+                <Text style={[styles.modalButtonText, { color: '#fff' }]}>
+                  Update
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -348,41 +394,44 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppTheme.background,
   },
   header: {
     padding: 20,
-    backgroundColor: AppTheme.yellow,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     position: 'relative',
   },
+  themeToggle: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    zIndex: 10,
+  },
   headerContent: {
     alignItems: 'center',
     paddingTop: 5,
+    paddingRight: 80,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'relative',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: AppTheme.white,
     textAlign: 'center',
   },
   sessionsContainer: {
     padding: 20,
   },
   sessionCard: {
-    backgroundColor: AppTheme.white,
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 15,
     marginVertical: 8,
     elevation: 2,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
     shadowRadius: 2,
     borderLeftWidth: 4,
-    borderLeftColor: AppTheme.yellow,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
@@ -405,12 +454,12 @@ const styles = StyleSheet.create({
     width: 80,
   },
   actionButtonText: {
-    color: AppTheme.white,
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: 14,
   },
   editButton: {
-    backgroundColor: AppTheme.yellow,
+    backgroundColor: '#ffcc00',
   },
   deleteButton: {
     backgroundColor: '#FF6B6B',
@@ -423,28 +472,23 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: AppTheme.text.dark,
     textAlign: 'center',
     marginBottom: 10,
   },
   emptySubText: {
     fontSize: 16,
-    color: AppTheme.text.light,
     textAlign: 'center',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: AppTheme.white,
     borderRadius: 10,
     padding: 20,
     width: '80%',
     elevation: 5,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -453,12 +497,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: AppTheme.text.dark,
     textAlign: 'center',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 10,
     marginBottom: 20,
@@ -479,28 +521,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   createButton: {
-    backgroundColor: AppTheme.main,
+    backgroundColor: '#ffcc00',
   },
   modalButtonText: {
-    color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
   sessionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: AppTheme.text.dark,
     marginBottom: 3,
   },
   sessionSubtitle: {
     fontSize: 13,
-    color: AppTheme.text.light,
     marginBottom: 12,
   },
   cardsTotalText: {
     fontSize: 14,
     fontWeight: '500',
-    color: AppTheme.text.dark,
     marginBottom: 4,
   },
   statsRow: {
@@ -526,7 +564,6 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: AppTheme.text.light,
   },
 });
 

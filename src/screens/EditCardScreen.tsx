@@ -16,6 +16,9 @@ import { RouteProp } from '@react-navigation/native';
 import { Card } from '../models/Card';
 import { saveCard, getCard } from '../utils/storage';
 import { AppStyles } from '../utils/themes';
+import { useTheme } from '../utils/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
+import BackButton from '../components/BackButton';
 
 type RootStackParamList = {
   Boxes: { sessionId: string };
@@ -37,6 +40,7 @@ const EditCardScreen: React.FC<EditCardScreenProps> = ({ navigation, route }) =>
   const [back, setBack] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { theme, isDarkMode } = useTheme();
 
   useEffect(() => {
     const loadCardData = async () => {
@@ -112,69 +116,94 @@ const EditCardScreen: React.FC<EditCardScreenProps> = ({ navigation, route }) =>
 
   if (isLoading) {
     return (
-      <SafeAreaView style={AppStyles.container.main}>
+      <SafeAreaView style={[AppStyles.container.main, { backgroundColor: theme.background }]}>
         <View style={AppStyles.loading.container}>
-          <Text style={AppStyles.loading.text}>Loading card data...</Text>
+          <Text style={[AppStyles.loading.text, { color: theme.text.dark }]}>Loading card data...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={AppStyles.container.main}>
+    <SafeAreaView style={[AppStyles.container.main, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
         <ScrollView contentContainerStyle={styles.scrollView}>
-          <View style={styles.header}>
-            <Text style={AppStyles.text.title}>Edit Card</Text>
-            <Text style={AppStyles.text.subtitle}>
-              Update the front and back of this card
-            </Text>
+          <View style={[styles.header, { backgroundColor: theme.main }]}>
+            <BackButton 
+              onPress={() => navigation.goBack()} 
+              style={styles.backButton}
+            />
+            <Text style={[styles.headerTitle, { color: isDarkMode ? '#000' : '#fff' }]}>Edit Card</Text>
+            <ThemeToggle style={styles.themeToggle} />
           </View>
 
-          <View style={AppStyles.container.card}>
-            <View style={styles.inputGroup}>
-              <Text style={AppStyles.form.label}>Front (Question)</Text>
-              <TextInput
-                style={AppStyles.form.textArea}
-                value={front}
-                onChangeText={setFront}
-                placeholder="Enter the question or word"
-                multiline
-                maxLength={200}
-              />
-            </View>
+          <View style={styles.content}>
+            <Text style={[styles.subtitle, { color: theme.text.light }]}>
+              Update the front and back of this card
+            </Text>
 
-            <View style={styles.inputGroup}>
-              <Text style={AppStyles.form.label}>Back (Answer)</Text>
-              <TextInput
-                style={[AppStyles.form.textArea, styles.inputBack]}
-                value={back}
-                onChangeText={setBack}
-                placeholder="Enter the answer or definition"
-                multiline
-                maxLength={500}
-              />
+            <View style={[AppStyles.container.card, { 
+              backgroundColor: theme.white,
+              shadowColor: isDarkMode ? '#fff' : '#000',
+              shadowOpacity: isDarkMode ? 0.05 : 0.1
+            }]}>
+              <View style={styles.inputGroup}>
+                <Text style={[AppStyles.form.label, { color: theme.text.dark }]}>Front (Question)</Text>
+                <TextInput
+                  style={[AppStyles.form.textArea, { 
+                    backgroundColor: theme.white,
+                    borderColor: isDarkMode ? '#444' : '#ddd',
+                    color: theme.text.dark
+                  }]}
+                  value={front}
+                  onChangeText={setFront}
+                  placeholder="Enter the question or word"
+                  placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
+                  multiline
+                  maxLength={200}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[AppStyles.form.label, { color: theme.text.dark }]}>Back (Answer)</Text>
+                <TextInput
+                  style={[AppStyles.form.textArea, styles.inputBack, { 
+                    backgroundColor: theme.white,
+                    borderColor: isDarkMode ? '#444' : '#ddd',
+                    color: theme.text.dark
+                  }]}
+                  value={back}
+                  onChangeText={setBack}
+                  placeholder="Enter the answer or definition"
+                  placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
+                  multiline
+                  maxLength={500}
+                />
+              </View>
             </View>
           </View>
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity
-              style={[AppStyles.button.secondary, styles.buttonFlex]}
+              style={[AppStyles.button.secondary, styles.buttonFlex, {
+                backgroundColor: isDarkMode ? '#444' : '#ddd'
+              }]}
               onPress={() => navigation.goBack()}
               disabled={isSubmitting}>
-              <Text style={AppStyles.button.secondaryText}>Cancel</Text>
+              <Text style={[AppStyles.button.secondaryText, { color: theme.text.dark }]}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 AppStyles.button.primary, 
                 isSubmitting && AppStyles.button.disabled,
-                styles.buttonFlex
+                styles.buttonFlex,
+                { backgroundColor: theme.main }
               ]}
               onPress={handleUpdate}
               disabled={isSubmitting}>
-              <Text style={AppStyles.button.primaryText}>
+              <Text style={[AppStyles.button.primaryText, { color: isDarkMode ? '#000' : '#fff' }]}>
                 {isSubmitting ? 'Updating...' : 'Update Card'}
               </Text>
             </TouchableOpacity>
@@ -194,7 +223,37 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    marginBottom: 30,
+    marginBottom: 20,
+    position: 'relative',
+    padding: 15,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 5,
+    left: 0,
+    zIndex: 10,
+  },
+  themeToggle: {
+    position: 'absolute',
+    top: 5,
+    right: 0,
+    zIndex: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  content: {
+    padding: 20,
   },
   inputGroup: {
     marginBottom: 20,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Card } from '../models/Card';
 import { AppTheme } from '../utils/themes';
+import { useTheme } from '../utils/ThemeContext';
 
 interface FlashCardProps {
   card: Card;
@@ -11,39 +12,68 @@ interface FlashCardProps {
 
 const FlashCard: React.FC<FlashCardProps> = ({ card, onCorrect, onIncorrect }) => {
   const [showAnswer, setShowAnswer] = useState(false);
+  const { theme, isDarkMode } = useTheme();
 
   const toggleCard = () => {
     setShowAnswer(!showAnswer);
   };
 
+  // Determine the card background color based on box level and dark mode
+  const getCardBgColor = () => {
+    if (isDarkMode) {
+      return card.boxLevel === 5 ? '#1c331c' : theme.white; // Dark green for mastery in dark mode
+    } else {
+      return card.boxLevel === 5 ? '#e6ffe6' : '#fff'; // Light green for mastery in light mode
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity 
-        style={[styles.card, { backgroundColor: card.boxLevel === 5 ? '#e6ffe6' : '#fff' }]} 
+        style={[
+          styles.card, 
+          { 
+            backgroundColor: getCardBgColor(),
+            shadowColor: isDarkMode ? '#fff' : '#000',
+            shadowOpacity: isDarkMode ? 0.1 : 0.3,
+          }
+        ]} 
         onPress={toggleCard}
         activeOpacity={0.9}
       >
-        <Text style={styles.boxLabel}>Box {card.boxLevel}</Text>
+        <Text style={[
+          styles.boxLabel, 
+          { 
+            backgroundColor: isDarkMode ? '#333' : '#f0f0f0',
+            color: isDarkMode ? '#ccc' : '#555'
+          }
+        ]}>Box {card.boxLevel}</Text>
         <View style={styles.contentContainer}>
-          <Text style={styles.contentText}>
+          <Text style={[
+            styles.contentText,
+            { color: isDarkMode ? theme.text.dark : '#333' }
+          ]}>
             {showAnswer ? card.back : card.front}
           </Text>
-          <Text style={styles.flipPrompt}>Tap to {showAnswer ? 'see question' : 'see answer'}</Text>
+          <Text style={[
+            styles.flipPrompt,
+            { color: isDarkMode ? '#777' : '#999' }
+          ]}>Tap to {showAnswer ? 'see question' : 'see answer'}</Text>
         </View>
       </TouchableOpacity>
 
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
-          style={[styles.button, styles.wrongButton]}
+          style={[styles.button, styles.wrongButton, { backgroundColor: theme.danger }]}
           onPress={onIncorrect}
         >
-          <Text style={styles.buttonText}>Incorrect</Text>
+          <Text style={[styles.buttonText, { color: '#fff' }]}>Incorrect</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, styles.correctButton]}
+          style={[styles.button, styles.correctButton, { backgroundColor: theme.main }]}
           onPress={onCorrect}
         >
-          <Text style={styles.buttonText}>Correct</Text>
+          <Text style={[styles.buttonText, { color: isDarkMode ? '#000' : '#fff' }]}>Correct</Text>
         </TouchableOpacity>
       </View>
     </View>

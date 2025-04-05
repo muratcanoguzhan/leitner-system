@@ -18,6 +18,8 @@ import {RouteProp} from '@react-navigation/native';
 import uuid from 'react-native-uuid';
 import { AppTheme, AppStyles } from '../utils/themes';
 import BackButton from '../components/BackButton';
+import { useTheme } from '../utils/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -39,6 +41,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { theme, isDarkMode } = useTheme();
 
   const handleSave = async () => {
     if (front.trim() === '' || back.trim() === '') {
@@ -99,44 +102,57 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={AppStyles.container.main}>
+    <SafeAreaView style={[AppStyles.container.main, { backgroundColor: theme.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}>
         <ScrollView contentContainerStyle={styles.scrollView}>
-          <View style={AppStyles.header.main}>
+          <View style={[AppStyles.header.main, { backgroundColor: theme.main }]}>
             <BackButton 
               onPress={() => navigation.goBack()} 
               style={styles.backButton}
             />
             <View style={AppStyles.header.content}>
-              <Text style={AppStyles.text.header}>Add New Card</Text>
-              <Text style={[AppStyles.text.subtitle, { color: AppTheme.white, opacity: 0.8 }]}>
+              <Text style={[AppStyles.text.header, { color: isDarkMode ? '#000' : '#fff' }]}>Add New Card</Text>
+              <Text style={[AppStyles.text.subtitle, { 
+                color: isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.8)' 
+              }]}>
                 New cards will be added to Box 1
               </Text>
             </View>
+            <ThemeToggle style={styles.themeToggle} />
           </View>
 
           <View style={styles.formContainer}>
             <View style={styles.inputGroup}>
-              <Text style={AppStyles.form.label}>Front (Question)</Text>
+              <Text style={[AppStyles.form.label, { color: theme.text.dark }]}>Front (Question)</Text>
               <TextInput
-                style={AppStyles.form.textArea}
+                style={[AppStyles.form.textArea, { 
+                  backgroundColor: theme.white,
+                  borderColor: isDarkMode ? '#444' : '#ddd',
+                  color: theme.text.dark
+                }]}
                 value={front}
                 onChangeText={setFront}
                 placeholder="Enter the question or word"
+                placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
                 multiline
                 maxLength={200}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={AppStyles.form.label}>Back (Answer)</Text>
+              <Text style={[AppStyles.form.label, { color: theme.text.dark }]}>Back (Answer)</Text>
               <TextInput
-                style={[AppStyles.form.textArea, styles.inputBack]}
+                style={[AppStyles.form.textArea, styles.inputBack, { 
+                  backgroundColor: theme.white,
+                  borderColor: isDarkMode ? '#444' : '#ddd',
+                  color: theme.text.dark
+                }]}
                 value={back}
                 onChangeText={setBack}
                 placeholder="Enter the answer or definition"
+                placeholderTextColor={isDarkMode ? '#999' : '#aaa'}
                 multiline
                 maxLength={500}
               />
@@ -148,11 +164,12 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
               style={[
                 AppStyles.button.primary, 
                 isSubmitting && AppStyles.button.disabled, 
-                styles.singleButton
+                styles.singleButton,
+                { backgroundColor: theme.main }
               ]}
               onPress={handleSave}
               disabled={isSubmitting}>
-              <Text style={AppStyles.button.primaryText}>
+              <Text style={[AppStyles.button.primaryText, { color: isDarkMode ? '#000' : '#fff' }]}>
                 {isSubmitting ? 'Adding...' : 'Add Card'}
               </Text>
             </TouchableOpacity>
@@ -188,6 +205,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 15,
     left: 10,
+    zIndex: 10,
+  },
+  themeToggle: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
     zIndex: 10,
   },
   singleButton: {
