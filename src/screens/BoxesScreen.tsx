@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, SafeAreaView, Dimensions } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
 import { getBoxTheme, AppTheme } from '../utils/themes';
@@ -30,6 +30,25 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
   const [boxCounts, setBoxCounts] = useState([0, 0, 0, 0, 0]);
   const [dueCards, setDueCards] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  // Check orientation
+  const checkOrientation = () => {
+    const { width, height } = Dimensions.get('window');
+    setIsLandscape(width > height);
+  };
+
+  useEffect(() => {
+    checkOrientation();
+    // Add event listener for orientation changes
+    Dimensions.addEventListener('change', checkOrientation);
+    
+    // Return cleanup function
+    return () => {
+      // Remove event listener
+      // Note: In newer React Native versions, this is handled automatically
+    };
+  }, []);
 
   useEffect(() => {
     const loadSessionData = async () => {
@@ -136,16 +155,17 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
             backgroundColor: theme.bg,
             borderColor: theme.border,
             borderWidth: 1,
-          }
+          },
+          isLandscape && styles.boxItemLandscape
         ]}
         onPress={() => navigation.navigate('BoxDetails', { boxLevel, sessionId })}
       >
         <View style={styles.boxHeader}>
           <Text style={styles.boxIcon}>{theme.icon}</Text>
-          <Text style={styles.boxTitle}>Box {boxLevel}</Text>
+          <Text style={[styles.boxTitle, isLandscape && styles.boxTitleLandscape]}>{`Box ${boxLevel}`}</Text>
         </View>
-        <Text style={styles.boxCount}>{item} cards</Text>
-        <Text style={styles.boxDescription}>{reviewText}</Text>
+        <Text style={[styles.boxCount, isLandscape && styles.boxCountLandscape]}>{item} cards</Text>
+        <Text style={[styles.boxDescription, isLandscape && styles.boxDescriptionLandscape]}>{reviewText}</Text>
       </TouchableOpacity>
     );
   };
@@ -162,35 +182,35 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, isLandscape && styles.headerLandscape]}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.navigate('LearningSessions')}
         >
-          <Text style={styles.backButtonText}>← All Sessions</Text>
+          <Text style={[styles.backButtonText, isLandscape && styles.backButtonTextLandscape]}>← All Sessions</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>{session.name}</Text>
-        <Text style={styles.subtitle}>Spaced Repetition Flashcards</Text>
+        <Text style={[styles.title, isLandscape && styles.titleLandscape]}>{session.name}</Text>
+        <Text style={[styles.subtitle, isLandscape && styles.subtitleLandscape]}>Spaced Repetition Flashcards</Text>
       </View>
 
-      <View style={styles.statsContainer}>
+      <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape]}>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>{cards.length}</Text>
-          <Text style={styles.statLabel}>Total Cards</Text>
+          <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{cards.length}</Text>
+          <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Total Cards</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={styles.statValue}>{dueCards}</Text>
-          <Text style={styles.statLabel}>Due for Review</Text>
+          <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{dueCards}</Text>
+          <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Due for Review</Text>
         </View>
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Your Boxes</Text>
+      <View style={[styles.sectionHeader, isLandscape && styles.sectionHeaderLandscape]}>
+        <Text style={[styles.sectionTitle, isLandscape && styles.sectionTitleLandscape]}>Your Boxes</Text>
         <TouchableOpacity 
-          style={styles.configButton}
+          style={[styles.configButton, isLandscape && styles.configButtonLandscape]}
           onPress={() => navigation.navigate('ConfigureBoxIntervals', { sessionId })}
         >
-          <Text style={styles.configButtonText}>Configure Intervals</Text>
+          <Text style={[styles.configButtonText, isLandscape && styles.configButtonTextLandscape]}>Configure Intervals</Text>
         </TouchableOpacity>
       </View>
       
@@ -201,20 +221,20 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
         contentContainerStyle={styles.boxesContainer}
       />
 
-      <View style={styles.buttonContainer}>
+      <View style={[styles.buttonContainer, isLandscape && styles.buttonContainerLandscape]}>
         <TouchableOpacity 
-          style={styles.button}
+          style={[styles.button, isLandscape && styles.buttonLandscape]}
           onPress={() => navigation.navigate('AddCard', { sessionId })}
         >
-          <Text style={styles.buttonText}>Add New Card</Text>
+          <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Add New Card</Text>
         </TouchableOpacity>
         
         {dueCards > 0 && (
           <TouchableOpacity 
-            style={[styles.button, styles.reviewButton]}
+            style={[styles.button, styles.reviewButton, isLandscape && styles.buttonLandscape]}
             onPress={() => navigation.navigate('Review', { sessionId })}
           >
-            <Text style={styles.buttonText}>Start Review</Text>
+            <Text style={[styles.buttonText, isLandscape && styles.buttonTextLandscape]}>Start Review</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -238,15 +258,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
+  headerLandscape: {
+    padding: 10,
+    paddingHorizontal: 15,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: AppTheme.white,
   },
+  titleLandscape: {
+    fontSize: 22,
+  },
   subtitle: {
     fontSize: 16,
     color: AppTheme.white,
     opacity: 0.9,
+  },
+  subtitleLandscape: {
+    fontSize: 14,
   },
   backButton: {
     marginBottom: 10,
@@ -255,6 +285,10 @@ const styles = StyleSheet.create({
     color: AppTheme.white,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  backButtonTextLandscape: {
+    fontSize: 14,
+    marginBottom: 5,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -269,6 +303,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     padding: 5,
   },
+  statsContainerLandscape: {
+    marginTop: 10,
+    marginHorizontal: 15,
+    padding: 3,
+  },
   statItem: {
     flex: 1,
     alignItems: 'center',
@@ -279,11 +318,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: AppTheme.text.dark,
   },
+  statValueLandscape: {
+    fontSize: 20,
+  },
   statLabel: {
     fontSize: 14,
     color: AppTheme.text.light,
     marginTop: 5,
     fontWeight: '500',
+  },
+  statLabelLandscape: {
+    fontSize: 12,
+    marginTop: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -293,10 +339,18 @@ const styles = StyleSheet.create({
     marginTop: 25,
     marginBottom: 10,
   },
+  sectionHeaderLandscape: {
+    paddingHorizontal: 15,
+    marginTop: 10,
+    marginBottom: 5,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: AppTheme.text.dark,
+  },
+  sectionTitleLandscape: {
+    fontSize: 18,
   },
   boxesContainer: {
     paddingHorizontal: 20,
@@ -313,6 +367,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
+  boxItemLandscape: {
+    padding: 12,
+    marginBottom: 8,
+  },
   boxHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -327,16 +385,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: AppTheme.text.dark,
   },
+  boxTitleLandscape: {
+    fontSize: 16,
+  },
   boxCount: {
     fontSize: 16,
     color: AppTheme.text.medium,
     marginTop: 6,
     marginBottom: 2,
   },
+  boxCountLandscape: {
+    fontSize: 14,
+    marginTop: 4,
+    marginBottom: 1,
+  },
   boxDescription: {
     fontSize: 14,
     color: AppTheme.text.light,
     marginTop: 5,
+  },
+  boxDescriptionLandscape: {
+    fontSize: 12,
+    marginTop: 3,
   },
   buttonContainer: {
     padding: 20,
@@ -344,6 +414,10 @@ const styles = StyleSheet.create({
     backgroundColor: AppTheme.white,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
+  },
+  buttonContainerLandscape: {
+    padding: 10,
+    paddingHorizontal: 15,
   },
   button: {
     flex: 1,
@@ -359,6 +433,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
+  buttonLandscape: {
+    padding: 12,
+    borderRadius: 10,
+  },
   reviewButton: {
     backgroundColor: AppTheme.danger,
   },
@@ -366,6 +444,9 @@ const styles = StyleSheet.create({
     color: AppTheme.white,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  buttonTextLandscape: {
+    fontSize: 14,
   },
   configButton: {
     backgroundColor: '#f0f0f0',
@@ -378,10 +459,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 1,
   },
+  configButtonLandscape: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
   configButtonText: {
     color: AppTheme.text.medium,
     fontSize: 14,
     fontWeight: '500',
+  },
+  configButtonTextLandscape: {
+    fontSize: 12,
   },
 });
 
