@@ -264,26 +264,25 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
             <Text style={styles.daysText}>days</Text>
           </View>
         </View>
-
-        <TouchableOpacity 
-          style={styles.resetButton}
-          onPress={resetToDefaults}
-        >
-          <Text style={styles.resetButtonText}>Reset to Defaults</Text>
-        </TouchableOpacity>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.saveButton}
-          onPress={saveIntervals}
-          disabled={isSaving}
-        >
-          <Text style={styles.saveButtonText}>
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity 
+        style={styles.resetButton}
+        onPress={resetToDefaults}
+      >
+        <Text style={styles.resetButtonText}>Reset</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={styles.floatingSaveButton}
+        onPress={saveIntervals}
+        disabled={isSaving}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.floatingSaveButtonText}>
+          {isSaving ? '...' : '✓'}
+        </Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -379,36 +378,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: AppTheme.text.light,
   },
-  footer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    backgroundColor: AppTheme.white,
-  },
-  saveButton: {
+  floatingSaveButton: {
+    position: 'absolute',
+    bottom: 25,
+    right: 25,
     backgroundColor: AppTheme.main,
-    padding: 16,
-    borderRadius: 12,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 20,
-    marginHorizontal: 30,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    zIndex: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  saveButtonText: {
-    color: AppTheme.white,
+  floatingSaveButtonText: {
+    color: AppTheme.text.dark,
+    fontSize: 28,
     fontWeight: 'bold',
-    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 46,
   },
   resetButton: {
+    position: 'absolute',
+    bottom: 25,
+    right: 90,
     backgroundColor: '#f0f0f0',
-    padding: 12,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    zIndex: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
   },
   resetButtonText: {
     color: AppTheme.text.light,
-    fontWeight: '500',
     fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   loadingContainer: {
     flex: 1,
