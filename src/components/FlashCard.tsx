@@ -8,9 +8,10 @@ interface FlashCardProps {
   card: Card;
   onCorrect: () => void;
   onIncorrect: () => void;
+  isAnswered?: boolean;
 }
 
-const FlashCard: React.FC<FlashCardProps> = ({ card, onCorrect, onIncorrect }) => {
+const FlashCard: React.FC<FlashCardProps> = ({ card, onCorrect, onIncorrect, isAnswered = false }) => {
   const [showAnswer, setShowAnswer] = useState(false);
   const { theme, isDarkMode } = useTheme();
 
@@ -64,16 +65,42 @@ const FlashCard: React.FC<FlashCardProps> = ({ card, onCorrect, onIncorrect }) =
 
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
-          style={[styles.button, styles.wrongButton, { backgroundColor: theme.danger }]}
+          style={[
+            styles.button, 
+            styles.wrongButton, 
+            { 
+              backgroundColor: isAnswered ? (isDarkMode ? '#444' : '#e0e0e0') : theme.danger,
+              opacity: isAnswered ? 0.7 : 1 
+            }
+          ]}
           onPress={onIncorrect}
+          disabled={isAnswered}
         >
-          <Text style={[styles.buttonText, { color: '#fff' }]}>Incorrect</Text>
+          <Text style={[styles.buttonText, { 
+            color: isAnswered ? (isDarkMode ? '#aaa' : '#999') : '#fff' 
+          }]}>
+            {isAnswered ? 'Answered' : 'Incorrect'}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, styles.correctButton, { backgroundColor: theme.main }]}
+          style={[
+            styles.button, 
+            styles.correctButton, 
+            { 
+              backgroundColor: isAnswered ? (isDarkMode ? '#444' : '#e0e0e0') : theme.main,
+              opacity: isAnswered ? 0.7 : 1
+            }
+          ]}
           onPress={onCorrect}
+          disabled={isAnswered}
         >
-          <Text style={[styles.buttonText, { color: isDarkMode ? '#000' : '#fff' }]}>Correct</Text>
+          <Text style={[styles.buttonText, { 
+            color: isAnswered 
+              ? (isDarkMode ? '#aaa' : '#999') 
+              : (isDarkMode ? '#000' : '#fff') 
+          }]}>
+            {isAnswered ? 'Answered' : 'Correct'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

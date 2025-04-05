@@ -36,6 +36,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [reviewComplete, setReviewComplete] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [answeredCardIds, setAnsweredCardIds] = useState<string[]>([]);
   const [reviewStats, setReviewStats] = useState<CardStats>({
     total: 0,
     correct: 0,
@@ -93,6 +94,13 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     if (currentCardIndex >= dueCards.length) return;
     
     const currentCard = dueCards[currentCardIndex];
+    
+    // Skip if this card has already been answered
+    if (answeredCardIds.includes(currentCard.id)) return;
+    
+    // Mark this card as answered
+    setAnsweredCardIds(prev => [...prev, currentCard.id]);
+    
     const updatedCard = { ...currentCard };
     
     // Move to next box if not already in the last box
@@ -132,6 +140,13 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     if (currentCardIndex >= dueCards.length) return;
     
     const currentCard = dueCards[currentCardIndex];
+    
+    // Skip if this card has already been answered
+    if (answeredCardIds.includes(currentCard.id)) return;
+    
+    // Mark this card as answered
+    setAnsweredCardIds(prev => [...prev, currentCard.id]);
+    
     const updatedCard = { ...currentCard };
     
     // Always move back to box 1 if incorrect
@@ -309,6 +324,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
           card={dueCards[currentCardIndex]} 
           onCorrect={handleCorrect}
           onIncorrect={handleIncorrect}
+          isAnswered={answeredCardIds.includes(dueCards[currentCardIndex]?.id)}
         />
         
         <TouchableOpacity
