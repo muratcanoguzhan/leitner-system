@@ -8,7 +8,8 @@ import {
   SafeAreaView,
   Alert,
   TextInput,
-  Modal
+  Modal,
+  ActivityIndicator
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { LearningSession } from '../models/Card';
@@ -16,10 +17,12 @@ import {
   loadSessions, 
   createLearningSession, 
   deleteLearningSession,
-  DEFAULT_BOX_INTERVALS
+  DEFAULT_BOX_INTERVALS,
+  updateLearningSession
 } from '../utils/storage';
 import { AppTheme } from '../utils/themes';
 import FloatingAddButton from '../components/FloatingAddButton';
+import { SessionStats, getSessionStats } from '../services/StatisticsService';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -32,11 +35,19 @@ interface LearningSessionsScreenProps {
   navigation: LearningSessionsScreenNavigationProp;
 }
 
+interface SessionWithStats extends LearningSession {
+  stats?: SessionStats;
+}
+
 const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigation }) => {
-  const [sessions, setSessions] = useState<LearningSession[]>([]);
+  const [sessions, setSessions] = useState<SessionWithStats[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [newSessionName, setNewSessionName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingSession, setEditingSession] = useState<SessionWithStats | null>(null);
+  const [editedName, setEditedName] = useState('');
+  const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -51,7 +62,21 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
 
   const loadSessionsData = async () => {
     const loadedSessions = await loadSessions();
-    setSessions(loadedSessions);
+    setLoadingStats(true);
+    
+    // Load stats for each session
+    const sessionsWithStats: SessionWithStats[] = [];
+    
+    for (const session of loadedSessions) {
+      const stats = await getSessionStats(session.id);
+      sessionsWithStats.push({
+        ...session,
+        stats
+      });
+    }
+    
+    setSessions(sessionsWithStats);
+    setLoadingStats(false);
   };
 
   const handleCreateSession = async () => {
@@ -64,7 +89,19 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
     try {
       // Create a new session with default box intervals
       const newSession = await createLearningSession(newSessionName.trim(), DEFAULT_BOX_INTERVALS);
-      setSessions([...sessions, newSession]);
+      const newSessionWithStats = {
+        ...newSession,
+        stats: {
+          total: 0,
+          correct: 0,
+          incorrect: 0,
+          due: 0,
+          promoted: 0,
+          demoted: 0,
+          boxCounts: [0, 0, 0, 0, 0]
+        }
+      };
+      setSessions([...sessions, newSessionWithStats]);
       setModalVisible(false);
       setNewSessionName('');
       
@@ -78,6 +115,41 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
       );
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleEditSession = (session: SessionWithStats) => {
+    setEditingSession(session);
+    setEditedName(session.name);
+    setEditModalVisible(true);
+  };
+
+  const handleUpdateSession = async () => {
+    if (!editingSession) return;
+    
+    if (!editedName.trim()) {
+      Alert.alert('Error', 'Please enter a name for your learning session');
+      return;
+    }
+
+    try {
+      await updateLearningSession(editingSession.id, editedName.trim());
+      
+      // Update the session in state
+      setSessions(sessions.map(s => 
+        s.id === editingSession.id 
+          ? { ...s, name: editedName.trim() } 
+          : s
+      ));
+      
+      setEditModalVisible(false);
+      setEditingSession(null);
+    } catch (error) {
+      console.error('Failed to update learning session:', error);
+      Alert.alert(
+        'Error',
+        'Failed to update learning session. Please check your internet connection and try again.'
+      );
     }
   };
 
@@ -103,24 +175,50 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
     );
   };
   
-  const renderSessionItem = ({ item }: { item: LearningSession }) => {    
+  const renderSessionItem = ({ item }: { item: SessionWithStats }) => {    
     return (
       <TouchableOpacity 
         style={styles.sessionCard}
         onPress={() => navigation.navigate('Boxes', { sessionId: item.id })}
       >
-        <View>
+        <View style={styles.sessionInfo}>
           <Text style={styles.sessionTitle}>{item.name}</Text>
           <Text style={styles.sessionSubtitle}>
             Created: {new Date(item.createdAt).toLocaleDateString()}
           </Text>
+          
+          {item.stats && (
+            <>
+              <Text style={styles.cardsTotalText}>
+                Cards: {item.stats.total} total
+              </Text>
+              <View style={styles.statsRow}>
+                <Text style={styles.correctText}>
+                  {item.stats.correct} correct
+                </Text>
+                <Text style={styles.incorrectText}>
+                  {item.stats.incorrect} incorrect
+                </Text>
+              </View>
+            </>
+          )}
         </View>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDeleteSession(item)}
-        >
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+        
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.editButton]}
+            onPress={() => handleEditSession(item)}
+          >
+            <Text style={styles.actionButtonText}>Edit</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.actionButton, styles.deleteButton]}
+            onPress={() => handleDeleteSession(item)}
+          >
+            <Text style={styles.actionButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -133,7 +231,12 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
         </View>
       </View>
 
-      {sessions.length === 0 ? (
+      {loadingStats ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={AppTheme.main} />
+          <Text style={styles.loadingText}>Loading sessions...</Text>
+        </View>
+      ) : sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>
             You don't have any learning sessions yet.
@@ -153,6 +256,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
 
       <FloatingAddButton onPress={() => setModalVisible(true)} />
 
+      {/* Create Session Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -196,6 +300,47 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
           </View>
         </View>
       </Modal>
+
+      {/* Edit Session Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit Learning Session</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Enter a new name for your session"
+              value={editedName}
+              onChangeText={setEditedName}
+              autoFocus
+            />
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setEditModalVisible(false);
+                  setEditingSession(null);
+                }}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.createButton]}
+                onPress={handleUpdateSession}
+              >
+                <Text style={styles.modalButtonText}>Update</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -207,7 +352,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    backgroundColor: AppTheme.main,
+    backgroundColor: AppTheme.yellow,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
     position: 'relative',
@@ -228,41 +373,47 @@ const styles = StyleSheet.create({
   sessionCard: {
     backgroundColor: AppTheme.white,
     borderRadius: 12,
-    padding: 20,
-    marginHorizontal: 20,
-    marginVertical: 10,
-    elevation: 3,
+    padding: 16,
+    marginHorizontal: 15,
+    marginVertical: 8,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    borderLeftWidth: 3,
-    borderLeftColor: AppTheme.main,
+    shadowRadius: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: AppTheme.yellow,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   sessionInfo: {
     flex: 1,
+    paddingRight: 12,
   },
-  sessionName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+  actionsContainer: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    gap: 8,
+    minWidth: 80,
   },
-  sessionDate: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 5,
-  },
-  deleteButton: {
-    backgroundColor: AppTheme.danger,
+  actionButton: {
     borderRadius: 8,
-    padding: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+    alignItems: 'center',
+    width: 80,
   },
-  deleteButtonText: {
+  actionButtonText: {
     color: AppTheme.white,
     fontWeight: 'bold',
+    fontSize: 14,
+  },
+  editButton: {
+    backgroundColor: AppTheme.yellow,
+  },
+  deleteButton: {
+    backgroundColor: '#FF6B6B',
   },
   emptyContainer: {
     flex: 1,
@@ -339,11 +490,43 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: AppTheme.text.dark,
+    marginBottom: 3,
   },
   sessionSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: AppTheme.text.light,
-    marginTop: 5,
+    marginBottom: 12,
+  },
+  cardsTotalText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: AppTheme.text.dark,
+    marginBottom: 4,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  correctText: {
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '500',
+    marginRight: 16,
+  },
+  incorrectText: {
+    fontSize: 14,
+    color: '#FF6B6B',
+    fontWeight: '500',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: AppTheme.text.light,
   },
 });
 

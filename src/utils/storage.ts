@@ -422,4 +422,58 @@ export const getSession = async (sessionId: string): Promise<LearningSession | n
     console.error('Error getting session:', e);
     return null;
   }
+};
+
+export const getCardStatsForSession = async (sessionId: string): Promise<{ total: number, correct: number, incorrect: number }> => {
+  if (!sessionId) {
+    console.warn('getCardStatsForSession called with null or empty sessionId');
+    return { total: 0, correct: 0, incorrect: 0 };
+  }
+  
+  try {
+    // Get all cards for this session
+    const cards = await getCardsForSession(sessionId);
+    
+    // Count total cards
+    const total = cards.length;
+    
+    // Count cards that were answered correctly (box level > 1)
+    const correct = cards.filter(card => card.boxLevel > 1).length;
+    
+    // Count cards that were answered incorrectly (in box 1)
+    const incorrect = cards.filter(card => card.boxLevel === 1 && card.lastReviewed !== null).length;
+    
+    return { 
+      total, 
+      correct, 
+      incorrect 
+    };
+  } catch (e) {
+    console.error('Error getting card stats for session:', e);
+    return { total: 0, correct: 0, incorrect: 0 };
+  }
+};
+
+export const updateLearningSession = async (sessionId: string, name: string): Promise<void> => {
+  if (!sessionId) {
+    throw new Error('Cannot update learning session with null ID');
+  }
+  
+  try {
+    // Get the existing session first
+    const session = await getSession(sessionId);
+    
+    if (!session) {
+      throw new Error(`Learning session with ID ${sessionId} not found`);
+    }
+    
+    // Update the name
+    session.name = name;
+    
+    // Save the updated session
+    await saveSession(session);
+  } catch (e) {
+    console.error('Error updating learning session:', e);
+    throw e;
+  }
 }; 

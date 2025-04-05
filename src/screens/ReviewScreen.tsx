@@ -12,6 +12,7 @@ import FlashCard from '../components/FlashCard';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { AppTheme } from '../utils/themes';
+import { CardStats } from '../services/StatisticsService';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -34,12 +35,13 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [reviewComplete, setReviewComplete] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [reviewStats, setReviewStats] = useState({
+  const [reviewStats, setReviewStats] = useState<CardStats>({
     total: 0,
     correct: 0,
     incorrect: 0,
     promoted: 0,
-    demoted: 0
+    demoted: 0,
+    due: 0
   });
 
   useEffect(() => {
@@ -64,12 +66,15 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
         
         setDueCards(dueCardsArray);
         
+        // Instead of calculating stats here, we can use the stats service
+        // but just set the total due cards
         setReviewStats({
           total: dueCardsArray.length,
           correct: 0,
           incorrect: 0,
           promoted: 0,
-          demoted: 0
+          demoted: 0,
+          due: dueCardsArray.length
         });
       } catch (error) {
         console.error('Error loading cards for review:', error);

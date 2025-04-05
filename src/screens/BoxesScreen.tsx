@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
-import { Card, LearningSession } from '../models/Card';
-import { isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
+import { LearningSession } from '../models/Card';
+import { getCardsForSession, loadSessions } from '../utils/storage';
 import { getBoxTheme, AppTheme } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import FloatingAddButton from '../components/FloatingAddButton';
 import BackButton from '../components/BackButton';
+import { SessionStats, getSessionStats } from '../services/StatisticsService';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -28,9 +29,7 @@ interface BoxesScreenProps {
 const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
   const { sessionId } = route.params;
   const [session, setSession] = useState<LearningSession | null>(null);
-  const [cards, setCards] = useState<Card[]>([]);
-  const [boxCounts, setBoxCounts] = useState([0, 0, 0, 0, 0]);
-  const [dueCards, setDueCards] = useState(0);
+  const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLandscape, setIsLandscape] = useState(false);
 
@@ -62,31 +61,11 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
     const loadCardData = async () => {
       try {
         setLoading(true);
-        const sessionCards = await getCardsForSession(sessionId);
-        setCards(sessionCards);
+        await getCardsForSession(sessionId); // Still fetch cards for side effects but don't store
         
-        // Get all sessions to pass to isDueForReview
-        const allSessions = await loadSessions();
-        
-        // Count cards in each box
-        const counts = [0, 0, 0, 0, 0];
-        let dueCount = 0;
-        
-        // Check each card if it's due for review
-        for (const card of sessionCards) {
-          // Adjust for 0-based array and 1-based boxLevel
-          const boxIndex = Math.max(0, Math.min(card.boxLevel - 1, 4)); // Ensure we stay within bounds (0-4)
-          counts[boxIndex]++;
-          
-          // Use the async version with await
-          const isDue = await isDueForReview(card, allSessions);
-          if (isDue) {
-            dueCount++;
-          }
-        }
-        
-        setBoxCounts(counts);
-        setDueCards(dueCount);
+        // Use the statistics service to get all stats
+        const stats = await getSessionStats(sessionId);
+        setSessionStats(stats);
       } catch (error) {
         console.error('Error loading card data:', error);
       } finally {
@@ -107,7 +86,7 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
     return unsubscribe;
   }, [navigation, sessionId]);
 
-  const renderBoxItem = ({ item, index }: { item: number; index: number }) => {
+  const renderBoxItem = ({ index }: { item: number; index: number }) => {
     const boxLevel = index + 1;
     let reviewText = '';
     
@@ -166,7 +145,9 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
           <Text style={styles.boxIcon}>{theme.icon}</Text>
           <Text style={[styles.boxTitle, isLandscape && styles.boxTitleLandscape]}>{`Box ${boxLevel}`}</Text>
         </View>
-        <Text style={[styles.boxCount, isLandscape && styles.boxCountLandscape]}>{item} cards</Text>
+        <Text style={[styles.boxCount, isLandscape && styles.boxCountLandscape]}>
+          {sessionStats ? sessionStats.boxCounts[index] : 0} cards
+        </Text>
         <Text style={[styles.boxDescription, isLandscape && styles.boxDescriptionLandscape]}>{reviewText}</Text>
       </TouchableOpacity>
     );
@@ -198,11 +179,15 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
 
         <View style={[styles.statsContainer, isLandscape && styles.statsContainerLandscape]}>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{cards.length}</Text>
+            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>
+              {sessionStats ? sessionStats.total : 0}
+            </Text>
             <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Total Cards</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>{dueCards}</Text>
+            <Text style={[styles.statValue, isLandscape && styles.statValueLandscape]}>
+              {sessionStats ? sessionStats.due : 0}
+            </Text>
             <Text style={[styles.statLabel, isLandscape && styles.statLabelLandscape]}>Due for Review</Text>
           </View>
         </View>
@@ -217,8 +202,8 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
         
-        <View style={styles.boxesListContainer}>
-          {boxCounts.map((count, index) => (
+        <View style={styles.boxesGrid}>
+          {sessionStats && sessionStats.boxCounts.map((count, index) => (
             <React.Fragment key={`box-${index + 1}`}>
               {renderBoxItem({ item: count, index })}
             </React.Fragment>
@@ -232,7 +217,7 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
         onPress={() => navigation.navigate('AddCard', { sessionId })}
       />
       
-      {dueCards > 0 && (
+      {sessionStats && sessionStats.due > 0 && (
         <TouchableOpacity 
           style={[styles.reviewFloatingButton]}
           onPress={() => navigation.navigate('Review', { sessionId })}
@@ -361,7 +346,7 @@ const styles = StyleSheet.create({
   sectionTitleLandscape: {
     fontSize: 18,
   },
-  boxesListContainer: {
+  boxesGrid: {
     paddingHorizontal: 20,
   },
   boxItem: {

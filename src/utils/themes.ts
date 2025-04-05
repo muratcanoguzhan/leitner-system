@@ -22,6 +22,7 @@ export const AppTheme = {
   white: '#fff',
   danger: '#ff6b6b',
   success: '#66cc66',
+  yellow: '#ffcc00',   // Yellow color for highlights and buttons
 };
 
 // Central definition of box themes
