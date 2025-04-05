@@ -160,41 +160,6 @@ export const saveSession = async (session: LearningSession): Promise<void> => {
   }
 };
 
-export const saveSessions = async (sessions: LearningSession[]): Promise<void> => {
-  try {
-    const db = await getDatabase();
-    await db.transaction(async (tx) => {
-      // Insert or replace each session
-      for (const session of sessions) {
-        const { boxIntervals, ...sessionData } = session;
-        
-        const dbSession = objectToDatabaseFormat({
-          ...sessionData,
-          ...boxIntervals
-        });
-        
-        await tx.executeSql(
-          `INSERT OR REPLACE INTO learning_sessions (
-            id, name, created_at, box1_days, box2_days, box3_days, box4_days, box5_days
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            dbSession.id,
-            dbSession.name,
-            dbSession.created_at,
-            dbSession.box1_days,
-            dbSession.box2_days,
-            dbSession.box3_days,
-            dbSession.box4_days,
-            dbSession.box5_days
-          ]
-        );
-      }
-    });
-  } catch (e) {
-    console.error('Error saving sessions:', e);
-  }
-};
-
 export const loadSessions = async (): Promise<LearningSession[]> => {
   try {
     const db = await getDatabase();
