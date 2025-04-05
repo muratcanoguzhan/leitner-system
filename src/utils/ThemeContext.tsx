@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useColorScheme, StatusBar, StyleSheet } from 'react-native';
+import { useColorScheme, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeMode, getAppStyles, getTheme } from './themes';
 
@@ -95,20 +95,4 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 // Custom hook to use the theme context
-export const useTheme = () => useContext(ThemeContext);
-
-// Custom hook to create themed styles
-export const useThemedStyles = <T extends StyleSheet.NamedStyles<T>>(
-  styleCreator: (theme: ReturnType<typeof getTheme>) => T
-): T => {
-  const { theme } = useTheme();
-  return StyleSheet.create(styleCreator(theme));
-};
-
-// Higher-order component to wrap screen components with theme
-export const withTheme = <P extends object>(Component: React.ComponentType<P & ThemeContextType>) => {
-  return (props: P) => {
-    const themeProps = useTheme();
-    return <Component {...props} {...themeProps} />;
-  };
-}; 
+export const useTheme = () => useContext(ThemeContext); 
