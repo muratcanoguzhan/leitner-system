@@ -218,7 +218,11 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
         </View>
         
         <View style={styles.boxesListContainer}>
-          {boxCounts.map((count, index) => renderBoxItem({ item: count, index }))}
+          {boxCounts.map((count, index) => (
+            <React.Fragment key={`box-${index + 1}`}>
+              {renderBoxItem({ item: count, index })}
+            </React.Fragment>
+          ))}
         </View>
 
         <View style={styles.spacer} />
