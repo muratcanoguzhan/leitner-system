@@ -98,13 +98,17 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
     const boxTheme = getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light');
     
     return (
-      <View style={[AppStyles.list.item, { 
-        borderLeftColor: boxTheme.border,
-        backgroundColor: theme.white,
-        shadowColor: isDarkMode ? '#fff' : '#000',
-        shadowOpacity: isDarkMode ? 0.05 : 0.1
-      }]}>
-        <View style={styles.cardContent}>
+      <View style={[
+        AppStyles.list.item, 
+        styles.rowLayout,
+        { 
+          borderLeftColor: boxTheme.border,
+          backgroundColor: theme.white,
+          shadowColor: isDarkMode ? '#fff' : '#000',
+          shadowOpacity: isDarkMode ? 0.05 : 0.1
+        }
+      ]}>
+        <View style={styles.textContent}>
           <Text style={[AppStyles.text.title, { color: theme.text.dark }]}>{item.front}</Text>
           <Text style={[AppStyles.text.subtitle, { color: theme.text.light }]}>{item.back}</Text>
         </View>
@@ -314,6 +318,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
+  },
+  rowLayout: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  textContent: {
+    flex: 1,
+    marginRight: 10,
   },
 });
 
