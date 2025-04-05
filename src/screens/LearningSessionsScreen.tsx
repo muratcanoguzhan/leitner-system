@@ -239,7 +239,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
           <Text style={[styles.title, { color: isDarkMode ? '#000' : '#fff' }]}>
             My Learning Sessions
           </Text>
-          <ThemeToggle style={styles.themeToggle} />
+          <ThemeToggle />
         </View>
       </View>
 
@@ -399,26 +399,15 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
-    position: 'relative',
-  },
-  themeToggle: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    zIndex: 10,
   },
   headerContent: {
-    alignItems: 'center',
-    paddingTop: 5,
-    paddingRight: 80,
     flexDirection: 'row',
-    justifyContent: 'center',
-    position: 'relative',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
   sessionsContainer: {
     padding: 20,
