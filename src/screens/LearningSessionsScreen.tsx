@@ -6,7 +6,6 @@ import {
   TouchableOpacity, 
   FlatList, 
   SafeAreaView,
-  Alert,
   TextInput,
   Modal,
   ActivityIndicator
@@ -24,6 +23,7 @@ import FloatingAddButton from '../components/FloatingAddButton';
 import { SessionStats, getSessionStats } from '../services/StatisticsService';
 import { useTheme } from '../utils/ThemeContext';
 import ThemeToggle from '../components/ThemeToggle';
+import { showAlert } from '../utils/alertUtil';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -83,7 +83,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
 
   const handleCreateSession = async () => {
     if (!newSessionName.trim()) {
-      Alert.alert('Error', 'Please enter a name for your learning session');
+      showAlert('Error', 'Please enter a name for your learning session');
       return;
     }
 
@@ -111,7 +111,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
       navigation.navigate('Boxes', { sessionId: newSession.id });
     } catch (error) {
       console.error('Failed to create learning session:', error);
-      Alert.alert(
+      showAlert(
         'Error',
         'Failed to create learning session. Please check your internet connection and try again.'
       );
@@ -130,7 +130,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
     if (!editingSession) return;
     
     if (!editedName.trim()) {
-      Alert.alert('Error', 'Please enter a name for your learning session');
+      showAlert('Error', 'Please enter a name for your learning session');
       return;
     }
 
@@ -148,7 +148,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
       setEditingSession(null);
     } catch (error) {
       console.error('Failed to update learning session:', error);
-      Alert.alert(
+      showAlert(
         'Error',
         'Failed to update learning session. Please check your internet connection and try again.'
       );
@@ -156,7 +156,7 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
   };
 
   const handleDeleteSession = async (session: LearningSession) => {
-    Alert.alert(
+    showAlert(
       'Delete Learning Session',
       `Are you sure you want to delete "${session.name}"? This will delete all cards in this session.`,
       [
@@ -171,10 +171,9 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
               setSessions(prevSessions => prevSessions.filter(s => s.id !== session.id));
             } catch (error) {
               console.error('Failed to delete session:', error);
-              Alert.alert(
+              showAlert(
                 'Error',
-                'Failed to delete learning session. Please try again.',
-                [{ text: 'OK' }]
+                'Failed to delete learning session. Please try again.'
               );
             }
           }

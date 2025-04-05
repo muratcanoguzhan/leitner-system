@@ -71,12 +71,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Get current theme and styles
   const styles = getAppStyles(themeMode);
   const theme = getTheme(themeMode);
+  const isDarkMode = themeMode === 'dark';
   
   // Value to be provided by context
   const contextValue: ThemeContextType = {
     themeMode,
     toggleTheme,
-    isDarkMode: themeMode === 'dark',
+    isDarkMode,
     styles,
     theme,
   };

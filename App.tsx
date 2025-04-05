@@ -8,8 +8,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { initDatabase } from './src/utils/database';
-import { Alert, ActivityIndicator, View, Text, Button } from 'react-native';
+import { ActivityIndicator, View, Text, Button } from 'react-native';
 import { ThemeProvider } from './src/utils/ThemeContext';
+import AlertProvider from './src/components/AlertProvider';
 
 function App(): React.JSX.Element {
   const [isReady, setIsReady] = useState(false);
@@ -27,12 +28,8 @@ function App(): React.JSX.Element {
       const errorMessage = 'Failed to initialize app: ' + (error instanceof Error ? error.message : String(error));
       setError(errorMessage);
       
-      // Show an alert with the error
-      Alert.alert(
-        'Database Error',
-        errorMessage,
-        [{ text: 'OK' }]
-      );
+      // We can't use showAlert here yet because the AlertProvider isn't mounted
+      // The error will be shown in the UI instead
     }
   };
 
@@ -69,11 +66,13 @@ function App(): React.JSX.Element {
   
   return (
     <ThemeProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <AppNavigator />
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
+      <AlertProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            <AppNavigator />
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </AlertProvider>
     </ThemeProvider>
   );
 }
