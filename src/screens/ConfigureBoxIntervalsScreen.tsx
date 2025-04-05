@@ -5,7 +5,6 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   SafeAreaView,
-  Alert,
   TextInput,
   ScrollView
 } from 'react-native';
@@ -16,6 +15,7 @@ import { getSession, DEFAULT_BOX_INTERVALS, saveSession } from '../utils/storage
 import { BOX_THEMES, DARK_BOX_THEMES, AppTheme } from '../utils/themes';
 import BackButton from '../components/BackButton';
 import { useTheme } from '../utils/ThemeContext';
+import { showAlert } from '../utils/alertUtil';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -50,7 +50,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
         }
       } catch (error) {
         console.error('Error loading session data:', error);
-        Alert.alert('Error', 'Failed to load session data');
+        showAlert('Error', 'Failed to load session data');
       } finally {
         setIsLoading(false);
       }
@@ -63,7 +63,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
     // Validate all values are positive numbers
     const values = Object.values(boxIntervals);
     if (values.some(value => isNaN(value) || value <= 0)) {
-      Alert.alert('Invalid Values', 'All review intervals must be positive numbers');
+      showAlert('Invalid Values', 'All review intervals must be positive numbers');
       return;
     }
     
@@ -72,7 +72,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
         boxIntervals.box2Days >= boxIntervals.box3Days ||
         boxIntervals.box3Days >= boxIntervals.box4Days ||
         boxIntervals.box4Days >= boxIntervals.box5Days) {
-      Alert.alert('Invalid Intervals', 'Each box interval should be larger than the previous one');
+      showAlert('Invalid Intervals', 'Each box interval should be larger than the previous one');
       return;
     }
 
@@ -92,7 +92,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
       await saveSession(updatedSession);
       setIsSaving(false);
       
-      Alert.alert(
+      showAlert(
         'Success', 
         'Box intervals updated successfully.',
         [{ 
@@ -102,7 +102,7 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
       );
     } catch (error) {
       console.error('Error saving box intervals:', error);
-      Alert.alert('Error', 'Failed to save box intervals');
+      showAlert('Error', 'Failed to save box intervals');
       setIsSaving(false);
     }
   };
@@ -124,7 +124,49 @@ const ConfigureBoxIntervalsScreen: React.FC<ConfigureBoxIntervalsScreenProps> = 
   };
 
   const resetToDefaults = () => {
-    setBoxIntervals(DEFAULT_BOX_INTERVALS);
+    showAlert(
+      'Reset to Defaults',
+      'Are you sure you want to reset to default intervals?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Reset', 
+          onPress: async () => {
+            setBoxIntervals(DEFAULT_BOX_INTERVALS);
+            
+            // Save the default intervals
+            setIsSaving(true);
+            try {
+              if (!session) {
+                throw new Error('Session not found');
+              }
+              
+              // Update session with default box intervals
+              const updatedSession = {
+                ...session,
+                boxIntervals: DEFAULT_BOX_INTERVALS
+              };
+              
+              await saveSession(updatedSession);
+              
+              showAlert(
+                'Success', 
+                'Box intervals reset to defaults successfully.',
+                [{ 
+                  text: 'OK', 
+                  onPress: () => navigation.navigate('Boxes', { sessionId })
+                }]
+              );
+            } catch (error) {
+              console.error('Error resetting box intervals:', error);
+              showAlert('Error', 'Failed to reset box intervals');
+            } finally {
+              setIsSaving(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   if (isLoading) {

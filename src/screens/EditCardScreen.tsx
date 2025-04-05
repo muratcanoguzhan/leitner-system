@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +17,7 @@ import { saveCard, getCard } from '../utils/storage';
 import { AppStyles } from '../utils/themes';
 import { useTheme } from '../utils/ThemeContext';
 import BackButton from '../components/BackButton';
+import { showAlert } from '../utils/alertUtil';
 
 type RootStackParamList = {
   Boxes: { sessionId: string };
@@ -49,12 +49,12 @@ const EditCardScreen: React.FC<EditCardScreenProps> = ({ navigation, route }) =>
           setFront(card.front);
           setBack(card.back);
         } else {
-          Alert.alert('Error', 'Could not find card data');
+          showAlert('Error', 'Could not find card data');
           navigation.goBack();
         }
       } catch (error) {
         console.error('Error loading card data:', error);
-        Alert.alert('Error', 'Failed to load card data');
+        showAlert('Error', 'Failed to load card data');
         navigation.goBack();
       } finally {
         setIsLoading(false);
@@ -66,7 +66,7 @@ const EditCardScreen: React.FC<EditCardScreenProps> = ({ navigation, route }) =>
 
   const handleUpdate = async () => {
     if (front.trim() === '' || back.trim() === '') {
-      Alert.alert(
+      showAlert(
         'Error',
         'Please enter both front and back text for the card.',
       );
@@ -94,7 +94,7 @@ const EditCardScreen: React.FC<EditCardScreenProps> = ({ navigation, route }) =>
       console.log('Card updated successfully:', updatedCard);
 
       // Show success message
-      Alert.alert(
+      showAlert(
         'Success',
         'Card updated successfully!',
         [
@@ -102,12 +102,11 @@ const EditCardScreen: React.FC<EditCardScreenProps> = ({ navigation, route }) =>
             text: 'OK',
             onPress: () => navigation.goBack(),
           },
-        ],
-        { cancelable: false },
+        ]
       );
     } catch (error) {
       console.error('Error updating card:', error);
-      Alert.alert('Error', 'Failed to update card. Please try again.');
+      showAlert('Error', 'Failed to update card. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

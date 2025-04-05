@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import {Card} from '../models/Card';
 import {saveCard} from '../utils/storage';
@@ -19,6 +18,7 @@ import uuid from 'react-native-uuid';
 import { AppStyles } from '../utils/themes';
 import BackButton from '../components/BackButton';
 import { useTheme } from '../utils/ThemeContext';
+import { showAlert } from '../utils/alertUtil';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -44,7 +44,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
 
   const handleSave = async () => {
     if (front.trim() === '' || back.trim() === '') {
-      Alert.alert(
+      showAlert(
         'Error',
         'Please enter both front and back text for the card.',
       );
@@ -74,7 +74,7 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
       setBack('');
 
       // Show success message
-      Alert.alert(
+      showAlert(
         'Success',
         'Card added successfully!',
         [
@@ -91,11 +91,10 @@ const AddCardScreen: React.FC<AddCardScreenProps> = ({navigation, route}) => {
             onPress: () => navigation.navigate('Boxes', {sessionId: route.params.sessionId}),
           },
         ],
-        {cancelable: false},
       );
     } catch (error) {
       console.error('Error saving card:', error);
-      Alert.alert('Error', 'Failed to save card. Please try again.');
+      showAlert('Error', 'Failed to save card. Please try again.');
       setIsSubmitting(false);
     }
   };

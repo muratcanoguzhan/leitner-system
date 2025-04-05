@@ -5,8 +5,7 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   FlatList, 
-  SafeAreaView,
-  Alert 
+  SafeAreaView
 } from 'react-native';
 import { Card, LearningSession } from '../models/Card';
 import { deleteCard, getCardsForSession, loadSessions } from '../utils/storage';
@@ -16,6 +15,7 @@ import { RouteProp } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
 import { useTheme } from '../utils/ThemeContext';
+import { showAlert } from '../utils/alertUtil';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -64,20 +64,16 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   );
 
   const handleDeleteCard = (cardId: string) => {
-    Alert.alert(
+    showAlert(
       'Delete Card',
       'Are you sure you want to delete this card?',
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
           style: 'destructive',
           onPress: async () => {
             try {
-              // Delete the card directly
               await deleteCard(cardId);
               console.log('Card deleted successfully:', cardId);
               
@@ -86,10 +82,10 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
               setBoxCards(boxCards.filter(card => card.id !== cardId));
             } catch (error) {
               console.error('Error deleting card:', error);
-              Alert.alert('Error', 'Failed to delete card. Please try again.');
+              showAlert('Error', 'Failed to delete card. Please try again.');
             }
-          },
-        },
+          }
+        }
       ]
     );
   };
