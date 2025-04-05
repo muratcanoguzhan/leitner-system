@@ -267,13 +267,12 @@ export const createLearningSession = async (name: string, boxIntervals?: BoxInte
 export const deleteLearningSession = async (sessionId: string): Promise<void> => {
   try {
     const db = await getDatabase();
-    await db.transaction(async (tx) => {
-      // Delete all cards associated with this session
-      await tx.executeSql('DELETE FROM cards WHERE learning_session_id = ?', [sessionId]);
-      
-      // Delete the session
-      await tx.executeSql('DELETE FROM learning_sessions WHERE id = ?', [sessionId]);
-    });
+    
+    // Delete all cards associated with this session
+    await db.executeSql('DELETE FROM cards WHERE learning_session_id = ?', [sessionId]);
+    
+    // Delete the session
+    await db.executeSql('DELETE FROM learning_sessions WHERE id = ?', [sessionId]);
   } catch (error) {
     console.error('Error deleting learning session:', error);
     throw error;

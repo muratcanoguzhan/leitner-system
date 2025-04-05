@@ -167,9 +167,15 @@ const LearningSessionsScreen: React.FC<LearningSessionsScreenProps> = ({ navigat
           onPress: async () => {
             try {
               await deleteLearningSession(session.id);
-              setSessions(sessions.filter(s => s.id !== session.id));
+              // Update local state to remove the deleted session
+              setSessions(prevSessions => prevSessions.filter(s => s.id !== session.id));
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete learning session');
+              console.error('Failed to delete session:', error);
+              Alert.alert(
+                'Error',
+                'Failed to delete learning session. Please try again.',
+                [{ text: 'OK' }]
+              );
             }
           }
         }
