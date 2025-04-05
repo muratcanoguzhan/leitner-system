@@ -166,10 +166,12 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
           style={styles.backButtonIcon}
         />
         <View style={styles.headerContent}>
-          <Text style={[styles.boxIcon, { color: isDarkMode ? '#fff' : '#fff' }]}>{getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light').icon}</Text>
-          <View>
-            <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#fff' }]}>Box {boxLevel}</Text>
-            <Text style={[styles.subtitle, { color: isDarkMode ? '#eee' : '#f0f0f0' }]}>{getBoxDescription()}</Text>
+          <View style={styles.headerInner}>
+            <Text style={[styles.boxIcon, { color: isDarkMode ? '#fff' : '#fff' }]}>{getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light').icon}</Text>
+            <View>
+              <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#fff' }]}>Box {boxLevel}</Text>
+              <Text style={[styles.subtitle, { color: isDarkMode ? '#eee' : '#f0f0f0' }]}>{getBoxDescription()}</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -219,6 +221,12 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '100%',
+    position: 'relative',
+  },
+  headerInner: {
     flexDirection: 'row',
     alignItems: 'center',
   },
