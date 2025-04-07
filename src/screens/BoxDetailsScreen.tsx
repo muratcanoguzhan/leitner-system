@@ -160,18 +160,16 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         return;
       }
 
-      // Filter out cards that are already in the target box
-      const cardsToMove = selectedCards.filter(card => card.boxLevel !== newBoxLevel);
-      
-      if (cardsToMove.length === 0) {
-        showAlert('No Action Needed', 'Selected cards are already in this box.', [{ text: 'OK' }]);
+      // Since we're in BoxDetailsScreen, all selected cards will have the same boxLevel (current box)
+      // Skip if trying to move to the current box (which should be prevented by UI anyway)
+      if (boxLevel === newBoxLevel) {
         setMultiMoveModalVisible(false);
         return;
       }
 
       // Update each card
       const updatedAllCards = [...allCards];
-      const updatePromises = cardsToMove.map(async (card) => {
+      const updatePromises = selectedCards.map(async (card) => {
         const updatedCard: Card = {
           ...card,
           boxLevel: newBoxLevel,
@@ -205,7 +203,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       // Show success message
       showAlert(
         'Cards Moved',
-        `${cardsToMove.length} card${cardsToMove.length === 1 ? '' : 's'} moved successfully to Box ${newBoxLevel}.`,
+        `${selectedCards.length} card${selectedCards.length === 1 ? '' : 's'} moved successfully to Box ${newBoxLevel}.`,
         [{ text: 'OK' }]
       );
     } catch (error) {
