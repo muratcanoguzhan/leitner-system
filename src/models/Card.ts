@@ -8,17 +8,34 @@ export interface Card {
   learningSessionId: string; // Reference to which Learning session this card belongs to
 }
 
+export enum CardActionType {
+  CREATED = 'created',
+  CORRECT = 'correct',
+  INCORRECT = 'incorrect',
+  MOVED = 'moved',
+  EDITED = 'edited',
+  DELETED = 'deleted'
+}
+
+export interface CardAction {
+  id: string;
+  cardId: string;
+  actionType: CardActionType;
+  timestamp: Date;
+  fromBoxLevel?: number; // For MOVED actions
+  toBoxLevel?: number;   // For MOVED and CREATED actions
+  learningSessionId: string;
+}
+
 export interface LearningSession {
   id: string;
   name: string;
   createdAt: Date;
-  boxIntervals: BoxIntervals;
-}
-
-export interface BoxIntervals {
-  box1Days: number; // days for Box 1 (typically 1 day)
-  box2Days: number; // days for Box 2 (typically 3 days)
-  box3Days: number; // days for Box 3 (typically 7 days)
-  box4Days: number; // days for Box 4 (typically 14 days)
-  box5Days: number; // days for Box 5 (typically 30 days)
+  boxIntervals?: {
+    box1Days: number;
+    box2Days: number;
+    box3Days: number;
+    box4Days: number;
+    box5Days: number;
+  };
 } 

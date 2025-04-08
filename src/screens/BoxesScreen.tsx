@@ -8,6 +8,7 @@ import { RouteProp } from '@react-navigation/native';
 import FloatingAddButton from '../components/FloatingAddButton';
 import BackButton from '../components/BackButton';
 import { SessionStats, getSessionStats } from '../services/StatisticsService';
+import { getSessionStatistics } from '../services/CardActionService';
 import { useTheme } from '../utils/ThemeContext';
 
 type RootStackParamList = {
@@ -31,6 +32,15 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
   const { sessionId } = route.params;
   const [session, setSession] = useState<LearningSession | null>(null);
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
+  const [actionStats, setActionStats] = useState<{
+    boxStats: Array<{
+      boxLevel: number;
+      total: number;
+      correct: number;
+      incorrect: number;
+      notAnswered: number;
+    }>;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLandscape, setIsLandscape] = useState(false);
   const { theme, isDarkMode } = useTheme();
@@ -68,6 +78,10 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
         // Use the statistics service to get all stats
         const stats = await getSessionStats(sessionId);
         setSessionStats(stats);
+        
+        // Get action-based statistics
+        const actionBasedStats = await getSessionStatistics(sessionId);
+        setActionStats(actionBasedStats);
       } catch (error) {
         console.error('Error loading card data:', error);
       } finally {
@@ -88,83 +102,36 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
     return unsubscribe;
   }, [navigation, sessionId]);
 
-  const renderBoxItem = ({ index }: { item: number; index: number }) => {
-    const boxLevel = index + 1;
-    let reviewText = '';
-    
-    // Get theme from shared utility
-    const boxTheme = getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light');
-    
-    // Use the session's custom box intervals if available
-    if (session && session.boxIntervals) {
-      switch(boxLevel) {
-        case 1: 
-          reviewText = session.boxIntervals.box1Days === 1 
-            ? 'Review daily' 
-            : `Review every ${session.boxIntervals.box1Days} days`;
-          break;
-        case 2: 
-          reviewText = `Review every ${session.boxIntervals.box2Days} days`;
-          break;
-        case 3: 
-          reviewText = `Review every ${session.boxIntervals.box3Days} days`;
-          break;
-        case 4: 
-          reviewText = `Review every ${session.boxIntervals.box4Days} days`;
-          break;
-        case 5: 
-          reviewText = `Review every ${session.boxIntervals.box5Days} days`;
-          break;
-        default:
-          reviewText = 'Custom review interval';
+  // Add a helper function to find box stats
+  const getBoxStatData = (boxLevel: number) => {
+    if (actionStats && actionStats.boxStats) {
+      const boxStat = actionStats.boxStats.find(stat => stat.boxLevel === boxLevel);
+      if (boxStat) {
+        return boxStat;
       }
-    } else {
-      // Fallback to default text if session or intervals are not available
+    }
+    return { total: 0, correct: 0, incorrect: 0, notAnswered: 0 };
+  };
+
+  const getReviewText = (boxLevel: number) => {
+    if (!session) return '';
+    
+    let interval = 0;
+    if (session.boxIntervals) {
+      // Safely access the boxIntervals object using property names
       switch(boxLevel) {
-        case 1: reviewText = 'Review daily'; break;
-        case 2: reviewText = 'Review every 3 days'; break;
-        case 3: reviewText = 'Review weekly'; break;
-        case 4: reviewText = 'Review bi-weekly'; break;
-        case 5: reviewText = 'Review monthly'; break;
-        default: reviewText = 'Custom review interval';
+        case 1: interval = session.boxIntervals.box1Days || 0; break;
+        case 2: interval = session.boxIntervals.box2Days || 0; break;
+        case 3: interval = session.boxIntervals.box3Days || 0; break;
+        case 4: interval = session.boxIntervals.box4Days || 0; break;
+        case 5: interval = session.boxIntervals.box5Days || 0; break;
+        default: interval = 0;
       }
     }
     
-    return (
-      <TouchableOpacity 
-        style={[
-          styles.boxItem, 
-          { 
-            backgroundColor: boxTheme.bg,
-            borderColor: boxTheme.border,
-            borderWidth: 1,
-          },
-          isLandscape && styles.boxItemLandscape
-        ]}
-        onPress={() => navigation.navigate('BoxDetails', { boxLevel, sessionId })}
-      >
-        <View style={styles.boxHeader}>
-          <Text style={styles.boxIcon}>{boxTheme.icon}</Text>
-          <Text style={[
-            styles.boxTitle, 
-            isLandscape && styles.boxTitleLandscape,
-            { color: isDarkMode ? '#fff' : '#333' }
-          ]}>{`Box ${boxLevel}`}</Text>
-        </View>
-        <Text style={[
-          styles.boxCount, 
-          isLandscape && styles.boxCountLandscape,
-          { color: isDarkMode ? '#fff' : '#555' }
-        ]}>
-          {sessionStats ? sessionStats.boxCounts[index] : 0} cards
-        </Text>
-        <Text style={[
-          styles.boxDescription, 
-          isLandscape && styles.boxDescriptionLandscape,
-          { color: isDarkMode ? '#ddd' : '#666' }
-        ]}>{reviewText}</Text>
-      </TouchableOpacity>
-    );
+    if (boxLevel === 1) return 'New cards';
+    else if (interval === 1) return 'Review every day';
+    else return `Review every ${interval} days`;
   };
 
   if (!session || loading) {
@@ -234,11 +201,62 @@ const BoxesScreen: React.FC<BoxesScreenProps> = ({ navigation, route }) => {
         </View>
         
         <View style={styles.boxesContainer}>
-          {sessionStats && sessionStats.boxCounts.map((count, index) => (
-            <React.Fragment key={`box-${index + 1}`}>
-              {renderBoxItem({ item: count, index })}
-            </React.Fragment>
-          ))}
+          {[1, 2, 3, 4, 5].map((boxLevel) => {
+            const boxStats = getBoxStatData(boxLevel);
+            return (
+              <TouchableOpacity 
+                key={`box-${boxLevel}`}
+                style={[
+                  styles.boxItem, 
+                  { 
+                    backgroundColor: getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light').bg,
+                    borderColor: getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light').border,
+                    borderWidth: 1,
+                  },
+                  isLandscape && styles.boxItemLandscape
+                ]}
+                onPress={() => navigation.navigate('BoxDetails', { boxLevel, sessionId })}
+              >
+                <View style={styles.boxHeader}>
+                  <Text style={styles.boxIcon}>{getBoxTheme(boxLevel, isDarkMode ? 'dark' : 'light').icon}</Text>
+                  <Text style={[
+                    styles.boxTitle, 
+                    isLandscape && styles.boxTitleLandscape,
+                    { color: isDarkMode ? '#fff' : '#333' }
+                  ]}>{`Box ${boxLevel}`}</Text>
+                </View>
+                <Text style={[
+                  styles.boxCount, 
+                  isLandscape && styles.boxCountLandscape,
+                  { color: isDarkMode ? '#fff' : '#555' }
+                ]}>
+                  {sessionStats ? sessionStats.boxCounts[boxLevel - 1] : 0} cards
+                </Text>
+                <Text style={[
+                  styles.boxDescription, 
+                  isLandscape && styles.boxDescriptionLandscape,
+                  { color: isDarkMode ? '#ddd' : '#666' }
+                ]}>{getReviewText(boxLevel)}</Text>
+                
+                {boxStats.total > 0 && (
+                  <View style={styles.boxStatsContainer}>
+                    <View style={styles.boxStatItem}>
+                      <Text style={[styles.boxStatValue, { color: theme.success }]}>{boxStats.correct}</Text>
+                      <Text style={[styles.boxStatLabel, { color: isDarkMode ? '#ddd' : '#666' }]}>Correct</Text>
+                    </View>
+                    <View style={styles.boxStatItem}>
+                      <Text style={[styles.boxStatValue, { color: theme.danger }]}>{boxStats.incorrect}</Text>
+                      <Text style={[styles.boxStatLabel, { color: isDarkMode ? '#ddd' : '#666' }]}>Incorrect</Text>
+                    </View>
+                    <View style={styles.boxStatItem}>
+                      <Text style={[styles.boxStatValue, { color: isDarkMode ? '#ddd' : '#666' }]}>{boxStats.notAnswered}</Text>
+                      <Text style={[styles.boxStatLabel, { color: isDarkMode ? '#ddd' : '#666' }]}>Not Answered</Text>
+                    </View>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
       
@@ -440,6 +458,22 @@ const styles = StyleSheet.create({
   reviewFloatingButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  boxStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 5,
+  },
+  boxStatItem: {
+    alignItems: 'center',
+  },
+  boxStatValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  boxStatLabel: {
+    fontSize: 12,
+    marginTop: 2,
   },
 });
 

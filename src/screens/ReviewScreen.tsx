@@ -6,7 +6,7 @@ import {
   TouchableOpacity, 
   SafeAreaView
 } from 'react-native';
-import { Card } from '../models/Card';
+import { Card, CardActionType } from '../models/Card';
 import { saveCard, isDueForReview, getCardsForSession, loadSessions } from '../utils/storage';
 import FlashCard from '../components/FlashCard';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -14,6 +14,7 @@ import { RouteProp } from '@react-navigation/native';
 import { AppTheme } from '../utils/themes';
 import { CardStats } from '../services/StatisticsService';
 import { useTheme } from '../utils/ThemeContext';
+import { logCardAction, getBoxStatistics } from '../services/CardActionService';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -37,7 +38,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   const [reviewComplete, setReviewComplete] = useState(false);
   const [loading, setLoading] = useState(true);
   const [answeredCardIds, setAnsweredCardIds] = useState<string[]>([]);
-  const [reviewStats, setReviewStats] = useState<CardStats>({
+  const [reviewStats, setReviewStats] = useState<CardStats & { boxStats?: Array<{ boxLevel: number; total: number; correct: number; incorrect: number; notAnswered: number }> }>({
     total: 0,
     correct: 0,
     incorrect: 0,
@@ -102,6 +103,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     setAnsweredCardIds(prev => [...prev, currentCard.id]);
     
     const updatedCard = { ...currentCard };
+    const originalBoxLevel = updatedCard.boxLevel;
     
     // Move to next box if not already in the last box
     if (updatedCard.boxLevel < 5) {
@@ -111,11 +113,38 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
         correct: prev.correct + 1,
         promoted: prev.promoted + 1
       }));
+      
+      // Log the CORRECT action
+      await logCardAction(
+        currentCard.id,
+        CardActionType.CORRECT,
+        sessionId,
+        originalBoxLevel,
+        updatedCard.boxLevel
+      );
+      
+      // Log the MOVED action
+      await logCardAction(
+        currentCard.id,
+        CardActionType.MOVED,
+        sessionId,
+        originalBoxLevel,
+        updatedCard.boxLevel
+      );
     } else {
       setReviewStats(prev => ({
         ...prev,
         correct: prev.correct + 1
       }));
+      
+      // Log the CORRECT action
+      await logCardAction(
+        currentCard.id,
+        CardActionType.CORRECT,
+        sessionId,
+        originalBoxLevel,
+        originalBoxLevel
+      );
     }
     
     // Update last reviewed date
@@ -148,6 +177,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
     setAnsweredCardIds(prev => [...prev, currentCard.id]);
     
     const updatedCard = { ...currentCard };
+    const originalBoxLevel = updatedCard.boxLevel;
     
     // Always move back to box 1 if incorrect
     if (updatedCard.boxLevel > 1) {
@@ -157,11 +187,38 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
         incorrect: prev.incorrect + 1,
         demoted: prev.demoted + 1
       }));
+      
+      // Log the INCORRECT action
+      await logCardAction(
+        currentCard.id,
+        CardActionType.INCORRECT,
+        sessionId,
+        originalBoxLevel,
+        1  // Changed to the new box level (box 1)
+      );
+      
+      // Log the MOVED action
+      await logCardAction(
+        currentCard.id,
+        CardActionType.MOVED,
+        sessionId,
+        originalBoxLevel,
+        1 // Always moved to box 1
+      );
     } else {
       setReviewStats(prev => ({
         ...prev,
         incorrect: prev.incorrect + 1
       }));
+      
+      // Log the INCORRECT action
+      await logCardAction(
+        currentCard.id,
+        CardActionType.INCORRECT,
+        sessionId,
+        originalBoxLevel,
+        originalBoxLevel  // This is correct as the box level doesn't change in this case
+      );
     }
     
     // Update last reviewed date
@@ -187,6 +244,8 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
       setCurrentCardIndex(currentCardIndex + 1);
     } else {
       setReviewComplete(true);
+      // Load box statistics when review is complete
+      loadBoxStatistics();
     }
   };
 
@@ -198,6 +257,37 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
 
   const handleFinish = () => {
     navigation.navigate('Boxes', { sessionId });
+  };
+
+  const loadBoxStatistics = async () => {
+    try {
+      const boxResults: Array<{
+        boxLevel: number;
+        total: number;
+        correct: number;
+        incorrect: number;
+        notAnswered: number;
+      }> = [];
+      
+      // Get statistics for each box
+      for (let boxLevel = 1; boxLevel <= 5; boxLevel++) {
+        const stats = await getBoxStatistics(sessionId, boxLevel);
+        if (stats.total > 0) {
+          boxResults.push({
+            boxLevel,
+            ...stats
+          });
+        }
+      }
+      
+      // Update reviewStats with box statistics
+      setReviewStats(prevStats => ({
+        ...prevStats,
+        boxStats: boxResults
+      }));
+    } catch (error) {
+      console.error('Error loading box statistics:', error);
+    }
   };
 
   if (loading) {
@@ -239,7 +329,7 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
   }
 
   if (reviewComplete) {
-    const { total, correct, incorrect, promoted, demoted } = reviewStats;
+    const { total, correct, incorrect, promoted, demoted, boxStats } = reviewStats;
     
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -276,6 +366,40 @@ const ReviewScreen: React.FC<ReviewScreenProps> = ({ navigation, route }) => {
               <Text style={[styles.statValue, { color: theme.text.dark }]}>{demoted}</Text>
             </View>
           </View>
+          
+          {boxStats && boxStats.length > 0 && (
+            <>
+              <Text style={[styles.boxStatsTitle, { color: theme.text.dark }]}>Box Statistics</Text>
+              
+              {boxStats.map(box => (
+                <View 
+                  key={`box-${box.boxLevel}`}
+                  style={[styles.boxStatRow, { 
+                    backgroundColor: theme.white,
+                    borderLeftColor: isDarkMode ? '#444' : '#ddd',
+                    shadowColor: isDarkMode ? '#fff' : '#000',
+                    shadowOpacity: isDarkMode ? 0.05 : 0.1
+                  }]}
+                >
+                  <Text style={[styles.boxTitle, { color: theme.text.dark }]}>Box {box.boxLevel}</Text>
+                  <View style={styles.boxStatItems}>
+                    <View style={styles.boxStatItem}>
+                      <Text style={[styles.boxStatValue, { color: theme.success }]}>{box.correct}</Text>
+                      <Text style={[styles.boxStatLabel, { color: theme.text.light }]}>Correct</Text>
+                    </View>
+                    <View style={styles.boxStatItem}>
+                      <Text style={[styles.boxStatValue, { color: theme.danger }]}>{box.incorrect}</Text>
+                      <Text style={[styles.boxStatLabel, { color: theme.text.light }]}>Incorrect</Text>
+                    </View>
+                    <View style={styles.boxStatItem}>
+                      <Text style={[styles.boxStatValue, { color: theme.text.light }]}>{box.notAnswered}</Text>
+                      <Text style={[styles.boxStatLabel, { color: theme.text.light }]}>Not Answered</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
           
           <TouchableOpacity
             style={[styles.button, { 
@@ -498,7 +622,45 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-  }
+  },
+  boxStatsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  boxStatRow: {
+    width: '100%',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  boxTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  boxStatItems: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  boxStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  boxStatValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  boxStatLabel: {
+    fontSize: 12,
+    marginTop: 2,
+  },
 });
 
 export default ReviewScreen; 

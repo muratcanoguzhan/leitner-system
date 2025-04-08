@@ -1,4 +1,5 @@
 import { getCardsForSession, loadSessions, isDueForReview } from '../utils/storage';
+import { getSessionStatistics } from './CardActionService';
 
 export interface CardStats {
   total: number;
@@ -14,7 +15,7 @@ export interface SessionStats extends CardStats {
 }
 
 /**
- * Calculates statistics for a session
+ * Calculates statistics for a session using card actions
  */
 export const getSessionStats = async (sessionId: string): Promise<SessionStats> => {
   if (!sessionId) {
@@ -37,44 +38,46 @@ export const getSessionStats = async (sessionId: string): Promise<SessionStats> 
     // Get all sessions for due date calculation
     const allSessions = await loadSessions();
     
-    // Count total cards
-    const total = cards.length;
-    
-    // Count cards that were answered correctly (box level > 1)
-    const correct = cards.filter(card => card.boxLevel > 1).length;
-    
-    // Count cards that were answered incorrectly (in box 1 and reviewed at least once)
-    const incorrect = cards.filter(card => card.boxLevel === 1 && card.lastReviewed !== null).length;
+    // Get action-based statistics from CardActionService
+    const actionStats = await getSessionStatistics(sessionId);
     
     // Count cards in each box
     const boxCounts = [0, 0, 0, 0, 0];
+    
+    // Calculate due cards using isDueForReview
     let dueCount = 0;
     
-    // Check each card if it's due for review
+    // Fill the box counts from the cards
     for (const card of cards) {
       // Adjust for 0-based array and 1-based boxLevel
       const boxIndex = Math.max(0, Math.min(card.boxLevel - 1, 4));
       boxCounts[boxIndex]++;
       
-      // Check if card is due for review
+      // Check if the card is due for review based on its box level and last reviewed date
       const isDue = await isDueForReview(card, allSessions);
       if (isDue) {
         dueCount++;
       }
     }
     
-    // We can't accurately track promoted/demoted counts without session history
-    // so we'll set them to 0 for now
-    const promoted = 0;
-    const demoted = 0;
+    // Calculate total stats from box stats
+    let totalCorrect = 0;
+    let totalIncorrect = 0;
+    
+    if (actionStats && actionStats.boxStats) {
+      for (const boxStat of actionStats.boxStats) {
+        totalCorrect += boxStat.correct;
+        totalIncorrect += boxStat.incorrect;
+      }
+    }
     
     return { 
-      total, 
-      correct, 
-      incorrect,
+      total: cards.length,
+      correct: totalCorrect,
+      incorrect: totalIncorrect,
       due: dueCount,
-      promoted,
-      demoted,
+      promoted: 0, // Not tracked in action stats yet
+      demoted: 0, // Not tracked in action stats yet
       boxCounts
     };
   } catch (e) {
@@ -100,8 +103,21 @@ export const getAllSessionsStats = async (): Promise<Map<string, SessionStats>> 
     const statsMap = new Map<string, SessionStats>();
     
     for (const session of sessions) {
-      const stats = await getSessionStats(session.id);
-      statsMap.set(session.id, stats);
+      try {
+        const stats = await getSessionStats(session.id);
+        statsMap.set(session.id, stats);
+      } catch (error) {
+        console.error(`Error getting stats for session ${session.id}:`, error);
+        statsMap.set(session.id, {
+          total: 0,
+          correct: 0,
+          incorrect: 0,
+          due: 0,
+          promoted: 0,
+          demoted: 0,
+          boxCounts: [0, 0, 0, 0, 0]
+        });
+      }
     }
     
     return statsMap;

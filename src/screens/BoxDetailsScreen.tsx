@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   Modal,
 } from 'react-native';
-import { Card, LearningSession } from '../models/Card';
+import { Card, LearningSession, CardActionType } from '../models/Card';
 import { deleteCard, getCardsForSession, loadSessions, saveCard } from '../utils/storage';
 import { getBoxTheme, AppStyles } from '../utils/themes';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -17,6 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
 import { useTheme } from '../utils/ThemeContext';
 import { showAlert } from '../utils/alertUtil';
+import { logCardAction, getBoxStatistics } from '../services/CardActionService';
 
 type RootStackParamList = {
   LearningSessions: undefined;
@@ -43,6 +44,12 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [multiMoveModalVisible, setMultiMoveModalVisible] = useState(false);
+  const [boxStats, setBoxStats] = useState<{ 
+    total: number;
+    correct: number;
+    incorrect: number;
+    notAnswered: number;
+  } | null>(null);
 
   // Helper function to close the card move modal
   const closeCardMoveModal = () => {
@@ -64,6 +71,15 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
     const sessions = await loadSessions();
     const currentSession = sessions.find(s => s.id === sessionId);
     setSession(currentSession || null);
+    
+    // Load box statistics
+    try {
+      const stats = await getBoxStatistics(sessionId, boxLevel);
+      setBoxStats(stats);
+    } catch (error) {
+      console.error('Error loading box statistics:', error);
+      setBoxStats(null);
+    }
   }, [boxLevel, sessionId]);
 
   useEffect(() => {
@@ -102,7 +118,18 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
               await deleteCard(cardId);
               console.log('Card deleted successfully:', cardId);
               
+              // Log the DELETE action
+              await logCardAction(
+                cardId,
+                CardActionType.DELETED,
+                sessionId,
+                boxLevel
+              );
+              
               setBoxCards(boxCards.filter(card => card.id !== cardId));
+              
+              // Reload card data to update stats
+              loadCardData();
             } catch (error) {
               console.error('Error deleting card:', error);
               showAlert('Error', 'Failed to delete card. Please try again.');
@@ -121,6 +148,8 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         return;
       }
 
+      const originalBoxLevel = card.boxLevel;
+      
       // Get the appropriate lastReviewed date
       const lastReviewedDate = getLastReviewedDate(newBoxLevel);
 
@@ -135,11 +164,23 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       await saveCard(updatedCard);
       console.log(`Card moved from Box ${card.boxLevel} to Box ${newBoxLevel}`);
       
+      // Log the MOVED action
+      await logCardAction(
+        card.id,
+        CardActionType.MOVED,
+        sessionId,
+        originalBoxLevel,
+        newBoxLevel
+      );
+      
       // Remove the card from boxCards since it's no longer in this box
       setBoxCards(boxCards.filter(c => c.id !== card.id));
 
       // Close the modal
       closeCardMoveModal();
+
+      // Reload card data to update stats
+      loadCardData();
 
       // Show success message
       showAlert(
@@ -179,6 +220,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 
       // Update each card in the database
       const updatePromises = selectedCards.map(async (card) => {
+        const originalBoxLevel = card.boxLevel;
         const updatedCard: Card = {
           ...card,
           boxLevel: newBoxLevel,
@@ -187,6 +229,15 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 
         // Save the updated card to database
         await saveCard(updatedCard);
+        
+        // Log the MOVED action
+        await logCardAction(
+          card.id,
+          CardActionType.MOVED,
+          sessionId,
+          originalBoxLevel,
+          newBoxLevel
+        );
       });
 
       // Wait for all updates to complete
@@ -199,6 +250,9 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       closeMultiMoveModal();
       setSelectedCards([]);
       setIsMultiSelectMode(false);
+
+      // Reload card data to update stats
+      loadCardData();
 
       // Show success message
       showAlert(
@@ -489,9 +543,30 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
             </TouchableOpacity>
           </View>
         ) : (
-          <Text style={[AppStyles.text.regular, { color: theme.text.dark }]}>
-            {boxCards.length} {boxCards.length === 1 ? 'card' : 'cards'} in this box
-          </Text>
+          <View style={styles.statsOverview}>
+            <Text style={[AppStyles.text.regular, { color: theme.text.dark }]}>
+              {boxCards.length} {boxCards.length === 1 ? 'card' : 'cards'} in this box
+            </Text>
+            
+            {boxStats && (
+              <View style={styles.boxStatsContainer}>
+                <View style={styles.boxStatItem}>
+                  <Text style={[styles.boxStatValue, { color: theme.success }]}>{boxStats.correct}</Text>
+                  <Text style={[styles.boxStatLabel, { color: theme.text.light }]}>Correct</Text>
+                </View>
+                
+                <View style={styles.boxStatItem}>
+                  <Text style={[styles.boxStatValue, { color: theme.danger }]}>{boxStats.incorrect}</Text>
+                  <Text style={[styles.boxStatLabel, { color: theme.text.light }]}>Incorrect</Text>
+                </View>
+                
+                <View style={styles.boxStatItem}>
+                  <Text style={[styles.boxStatValue, { color: theme.text.light }]}>{boxStats.notAnswered}</Text>
+                  <Text style={[styles.boxStatLabel, { color: theme.text.light }]}>Not Answered</Text>
+                </View>
+              </View>
+            )}
+          </View>
         )}
       </View>
 
@@ -681,6 +756,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  statsOverview: {
+    width: '100%',
+  },
+  boxStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  boxStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  boxStatValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  boxStatLabel: {
+    fontSize: 12,
+    marginTop: 2,
   },
 });
 
