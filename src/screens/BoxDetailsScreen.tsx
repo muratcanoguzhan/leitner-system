@@ -35,7 +35,6 @@ interface BoxDetailsScreenProps {
 
 const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }) => {
   const { boxLevel, sessionId } = route.params;
-  const [allCards, setAllCards] = useState<Card[]>([]);
   const [boxCards, setBoxCards] = useState<Card[]>([]);
   const [session, setSession] = useState<LearningSession | null>(null);
   const { theme, isDarkMode } = useTheme();
@@ -47,8 +46,6 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 
   const loadCardData = useCallback(async () => {
     const loadedCards = await getCardsForSession(sessionId);
-    setAllCards(loadedCards);
-    
     const cardsInBox = loadedCards.filter(card => card.boxLevel === boxLevel);
     setBoxCards(cardsInBox);
     
@@ -94,8 +91,6 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
               await deleteCard(cardId);
               console.log('Card deleted successfully:', cardId);
               
-              // Update state
-              setAllCards(allCards.filter(card => card.id !== cardId));
               setBoxCards(boxCards.filter(card => card.id !== cardId));
             } catch (error) {
               console.error('Error deleting card:', error);
@@ -129,17 +124,9 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       // Save the card to the database
       await saveCard(updatedCard);
       console.log(`Card moved from Box ${card.boxLevel} to Box ${newBoxLevel}`);
-
-      // Update local state
-      const updatedAllCards = allCards.map(c => 
-        c.id === card.id ? updatedCard : c
-      );
-      setAllCards(updatedAllCards);
       
-      // If the card was moved out of the current box, remove it from boxCards
-      if (boxLevel === card.boxLevel) {
-        setBoxCards(boxCards.filter(c => c.id !== card.id));
-      }
+      // Remove the card from boxCards since it's no longer in this box
+      setBoxCards(boxCards.filter(c => c.id !== card.id));
 
       // Close the modal
       setMoveBoxModalVisible(false);
@@ -184,8 +171,6 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       // Get the appropriate lastReviewed date once
       const lastReviewedDate = getLastReviewedDate(newBoxLevel);
 
-      // Update each card
-      const updatedAllCards = [...allCards];
       const updatePromises = selectedCards.map(async (card) => {
         const updatedCard: Card = {
           ...card,
@@ -195,22 +180,13 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
 
         // Save the updated card to database
         await saveCard(updatedCard);
-        
-        // Update local array
-        const index = updatedAllCards.findIndex(c => c.id === card.id);
-        if (index !== -1) {
-          updatedAllCards[index] = updatedCard;
-        }
       });
 
       // Wait for all updates to complete
       await Promise.all(updatePromises);
-      setAllCards(updatedAllCards);
       
       // If we're moving cards out of the current box, remove them from boxCards
-      if (boxLevel !== newBoxLevel) {
-        setBoxCards(boxCards.filter(card => !selectedCards.some(c => c.id === card.id)));
-      }
+      setBoxCards(boxCards.filter(card => !selectedCards.some(c => c.id === card.id)));
 
       // Reset state
       setMultiMoveModalVisible(false);
