@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, Text, Animated, Easing } from 'react-native';
+import { TouchableOpacity, StyleSheet, Animated, Easing, View, Text } from 'react-native';
 import { useTheme } from '../utils/ThemeContext';
 
 type ThemeToggleProps = {
@@ -7,26 +7,36 @@ type ThemeToggleProps = {
 };
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ style }) => {
-  const { toggleTheme, isDarkMode, theme } = useTheme();
-  const [animatedValue] = React.useState(new Animated.Value(isDarkMode ? 1 : 0));
+  const { toggleTheme, isDarkMode } = useTheme();
+  const [animValue] = React.useState(new Animated.Value(isDarkMode ? 1 : 0));
 
   React.useEffect(() => {
-    Animated.timing(animatedValue, {
+    Animated.timing(animValue, {
       toValue: isDarkMode ? 1 : 0,
-      duration: 250,
-      easing: Easing.linear,
-      useNativeDriver: false,
+      duration: 400,
+      easing: Easing.bezier(0.4, 0.0, 0.2, 1),
+      useNativeDriver: true,
     }).start();
-  }, [isDarkMode, animatedValue]);
+  }, [isDarkMode, animValue]);
 
-  const translateX = animatedValue.interpolate({
+  const sunOpacity = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [2, 32]
+    outputRange: [1, 0]
   });
 
-  const bgColor = animatedValue.interpolate({
+  const moonOpacity = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#f5f5f5', '#222222']
+    outputRange: [0, 1]
+  });
+
+  const rotate = animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg']
+  });
+
+  const translateY = animValue.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0, -8, 0]
   });
 
   return (
@@ -37,63 +47,82 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ style }) => {
         style
       ]}
       activeOpacity={0.7}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
-      <Animated.View
-        style={[
-          styles.toggleContainer,
-          {
-            backgroundColor: bgColor,
-            borderColor: theme.main,
-            borderWidth: 2,
-          }
-        ]}
-      >
-        <Text style={styles.iconLeft}>☀️</Text>
+      <View style={styles.iconWrapper}>
+        {/* Sun Icon */}
         <Animated.View 
           style={[
-            styles.toggleButton, 
-            { 
-              backgroundColor: theme.main,
-              transform: [{ translateX }] 
+            styles.iconPosition,
+            {
+              opacity: sunOpacity,
+              transform: [
+                { rotate },
+                { translateY }
+              ]
             }
-          ]} 
-        />
-        <Text style={styles.iconRight}>🌙</Text>
-      </Animated.View>
+          ]}
+        >
+          <Text style={[
+            styles.emojiIcon,
+            isDarkMode ? styles.darkShadow : styles.lightShadow
+          ]}>☀️</Text>
+        </Animated.View>
+
+        {/* Moon Icon */}
+        <Animated.View 
+          style={[
+            styles.iconPosition,
+            {
+              opacity: moonOpacity,
+              transform: [
+                { rotate: rotate },
+                { translateY }
+              ]
+            }
+          ]}
+        >
+          <Text style={[
+            styles.emojiIcon,
+            isDarkMode ? styles.darkShadow : styles.lightShadow
+          ]}>🌙</Text>
+        </Animated.View>
+      </View>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 4,
-    borderRadius: 30,
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 20,
   },
-  toggleContainer: {
-    width: 70,
-    height: 34,
-    borderRadius: 17,
-    flexDirection: 'row',
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 5,
   },
-  toggleButton: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+  iconPosition: {
     position: 'absolute',
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  iconLeft: {
-    fontSize: 16,
-    marginLeft: 4,
+  emojiIcon: {
+    fontSize: 24
   },
-  iconRight: {
-    fontSize: 16,
-    marginRight: 4,
+  lightShadow: {
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  darkShadow: {
+    textShadowColor: 'rgba(0, 0, 0, 0.7)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   }
 });
 
