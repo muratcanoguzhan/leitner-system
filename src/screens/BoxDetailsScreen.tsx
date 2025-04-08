@@ -69,6 +69,17 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
     }, [loadCardData])
   );
 
+  // Helper method to get the lastReviewed date based on the target box level
+  const getLastReviewedDate = (targetBoxLevel: number): Date | null => {
+    if (targetBoxLevel === 1) {
+      // For box 1, always set lastReviewed to null for immediate review
+      return null;
+    } else {
+      // For all other boxes, set to current date
+      return new Date();
+    }
+  };
+
   const handleDeleteCard = (cardId: string) => {
     showAlert(
       'Delete Card',
@@ -105,11 +116,14 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         return;
       }
 
-      // Create an updated card with the new box level
+      // Get the appropriate lastReviewed date
+      const lastReviewedDate = getLastReviewedDate(newBoxLevel);
+
+      // Create an updated card with the new box level and lastReviewed date
       const updatedCard: Card = {
         ...card,
         boxLevel: newBoxLevel,
-        lastReviewed: null // Set to null so it becomes available for review
+        lastReviewed: lastReviewedDate
       };
 
       // Save the card to the database
@@ -167,13 +181,16 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         return;
       }
 
+      // Get the appropriate lastReviewed date once
+      const lastReviewedDate = getLastReviewedDate(newBoxLevel);
+
       // Update each card
       const updatedAllCards = [...allCards];
       const updatePromises = selectedCards.map(async (card) => {
         const updatedCard: Card = {
           ...card,
           boxLevel: newBoxLevel,
-          lastReviewed: new Date() // Current date to reset review timing
+          lastReviewed: lastReviewedDate
         };
 
         // Save the updated card to database
