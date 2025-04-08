@@ -44,6 +44,17 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [multiMoveModalVisible, setMultiMoveModalVisible] = useState(false);
 
+  // Helper function to close the card move modal
+  const closeCardMoveModal = () => {
+    setMoveBoxModalVisible(false);
+    setSelectedCard(null);
+  };
+
+  // Helper function to close the multi-card move modal
+  const closeMultiMoveModal = () => {
+    setMultiMoveModalVisible(false);
+  };
+
   const loadCardData = useCallback(async () => {
     const loadedCards = await getCardsForSession(sessionId);
     const cardsInBox = loadedCards.filter(card => card.boxLevel === boxLevel);
@@ -106,8 +117,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
     try {
       // Skip if trying to move to the same box
       if (card.boxLevel === newBoxLevel) {
-        setMoveBoxModalVisible(false);
-        setSelectedCard(null);
+        closeCardMoveModal();
         return;
       }
 
@@ -129,8 +139,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       setBoxCards(boxCards.filter(c => c.id !== card.id));
 
       // Close the modal
-      setMoveBoxModalVisible(false);
-      setSelectedCard(null);
+      closeCardMoveModal();
 
       // Show success message
       showAlert(
@@ -156,21 +165,19 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
   // Handle moving multiple cards at once
   const handleMultiMoveCards = async (newBoxLevel: number) => {
     try {
-      if (selectedCards.length === 0) {
-        setMultiMoveModalVisible(false);
-        return;
-      }
-
-      // Since we're in BoxDetailsScreen, all selected cards will have the same boxLevel (current box)
+      // No need to check for empty selection - the button to open modal is disabled in this case
+      // and we're enforcing selection in the UI
+      
       // Skip if trying to move to the current box (which should be prevented by UI anyway)
       if (boxLevel === newBoxLevel) {
-        setMultiMoveModalVisible(false);
+        closeMultiMoveModal();
         return;
       }
 
       // Get the appropriate lastReviewed date once
       const lastReviewedDate = getLastReviewedDate(newBoxLevel);
 
+      // Update each card in the database
       const updatePromises = selectedCards.map(async (card) => {
         const updatedCard: Card = {
           ...card,
@@ -185,11 +192,11 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       // Wait for all updates to complete
       await Promise.all(updatePromises);
       
-      // If we're moving cards out of the current box, remove them from boxCards
+      // Remove the selected cards from boxCards
       setBoxCards(boxCards.filter(card => !selectedCards.some(c => c.id === card.id)));
 
       // Reset state
-      setMultiMoveModalVisible(false);
+      closeMultiMoveModal();
       setSelectedCards([]);
       setIsMultiSelectMode(false);
 
@@ -203,6 +210,46 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
       console.error('Error moving multiple cards:', error);
       showAlert('Error', 'Failed to move cards. Please try again.');
     }
+  };
+
+  // Helper function to render a box button
+  const renderBoxButton = (level: number, isMultiSelect: boolean, targetBoxLevel: number | undefined, onPress: (level: number) => void) => {
+    const isCurrentBox = isMultiSelect 
+      ? boxLevel === level 
+      : targetBoxLevel === level;
+    
+    return (
+      <TouchableOpacity
+        key={isMultiSelect ? `multi-box-${level}` : `box-${level}`}
+        style={[
+          styles.boxButton,
+          { 
+            backgroundColor: isCurrentBox
+              ? isDarkMode ? '#333' : '#f0f0f0' 
+              : getBoxTheme(level, isDarkMode ? 'dark' : 'light').header
+          }
+        ]}
+        onPress={() => onPress(level)}
+        disabled={isCurrentBox}
+      >
+        <Text style={[
+          styles.boxButtonIcon, 
+          { color: isCurrentBox ? (isDarkMode ? '#fff' : '#555') : '#fff' }
+        ]}>
+          {getBoxTheme(level, isDarkMode ? 'dark' : 'light').icon}
+        </Text>
+        <Text style={[
+          styles.boxButtonText, 
+          { 
+            color: isCurrentBox ? (isDarkMode ? '#fff' : '#555') : '#fff',
+            opacity: isCurrentBox ? 0.8 : 1
+          }
+        ]}>
+          Box {level}
+          {isCurrentBox ? ' (current)' : ''}
+        </Text>
+      </TouchableOpacity>
+    );
   };
 
   const renderCardItem = ({ item }: { item: Card }) => {
@@ -315,10 +362,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         animationType="slide"
         transparent={true}
         visible={moveBoxModalVisible}
-        onRequestClose={() => {
-          setMoveBoxModalVisible(false);
-          setSelectedCard(null);
-        }}
+        onRequestClose={closeCardMoveModal}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.white }]}>
@@ -328,46 +372,19 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
             </Text>
             
             <View style={styles.boxButtonsContainer}>
-              {[1, 2, 3, 4, 5].map(level => (
-                <TouchableOpacity
-                  key={`box-${level}`}
-                  style={[
-                    styles.boxButton,
-                    { 
-                      backgroundColor: selectedCard?.boxLevel === level 
-                        ? isDarkMode ? '#333' : '#f0f0f0' 
-                        : getBoxTheme(level, isDarkMode ? 'dark' : 'light').header
-                    }
-                  ]}
-                  onPress={() => handleMoveCard(selectedCard as Card, level)}
-                  disabled={selectedCard?.boxLevel === level}
-                >
-                  <Text style={[
-                    styles.boxButtonIcon, 
-                    { color: selectedCard?.boxLevel === level ? (isDarkMode ? '#fff' : '#555') : '#fff' }
-                  ]}>
-                    {getBoxTheme(level, isDarkMode ? 'dark' : 'light').icon}
-                  </Text>
-                  <Text style={[
-                    styles.boxButtonText, 
-                    { 
-                      color: selectedCard?.boxLevel === level ? (isDarkMode ? '#fff' : '#555') : '#fff',
-                      opacity: selectedCard?.boxLevel === level ? 0.8 : 1
-                    }
-                  ]}>
-                    Box {level}
-                    {selectedCard?.boxLevel === level ? ' (current)' : ''}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {[1, 2, 3, 4, 5].map(level => 
+                renderBoxButton(
+                  level, 
+                  false, 
+                  selectedCard?.boxLevel, 
+                  (boxLevel) => handleMoveCard(selectedCard as Card, boxLevel)
+                )
+              )}
             </View>
             
             <TouchableOpacity
               style={[styles.cancelButton, { backgroundColor: isDarkMode ? '#333' : '#f0f0f0' }]}
-              onPress={() => {
-                setMoveBoxModalVisible(false);
-                setSelectedCard(null);
-              }}
+              onPress={closeCardMoveModal}
             >
               <Text style={[styles.cancelButtonText, { color: theme.text.light }]}>Cancel</Text>
             </TouchableOpacity>
@@ -380,9 +397,7 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
         animationType="slide"
         transparent={true}
         visible={multiMoveModalVisible}
-        onRequestClose={() => {
-          setMultiMoveModalVisible(false);
-        }}
+        onRequestClose={closeMultiMoveModal}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.white }]}>
@@ -392,45 +407,19 @@ const BoxDetailsScreen: React.FC<BoxDetailsScreenProps> = ({ navigation, route }
             </Text>
             
             <View style={styles.boxButtonsContainer}>
-              {[1, 2, 3, 4, 5].map(level => (
-                <TouchableOpacity
-                  key={`multi-box-${level}`}
-                  style={[
-                    styles.boxButton,
-                    { 
-                      backgroundColor: boxLevel === level 
-                        ? isDarkMode ? '#333' : '#f0f0f0' 
-                        : getBoxTheme(level, isDarkMode ? 'dark' : 'light').header
-                    }
-                  ]}
-                  onPress={() => handleMultiMoveCards(level)}
-                  disabled={boxLevel === level && selectedCards.every(card => card.boxLevel === level)}
-                >
-                  <Text style={[
-                    styles.boxButtonIcon, 
-                    { color: boxLevel === level ? (isDarkMode ? '#fff' : '#555') : '#fff' }
-                  ]}>
-                    {getBoxTheme(level, isDarkMode ? 'dark' : 'light').icon}
-                  </Text>
-                  <Text style={[
-                    styles.boxButtonText, 
-                    { 
-                      color: boxLevel === level ? (isDarkMode ? '#fff' : '#555') : '#fff',
-                      opacity: boxLevel === level ? 0.8 : 1
-                    }
-                  ]}>
-                    Box {level}
-                    {boxLevel === level ? ' (current)' : ''}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {[1, 2, 3, 4, 5].map(level => 
+                renderBoxButton(
+                  level, 
+                  true, 
+                  undefined, 
+                  handleMultiMoveCards
+                )
+              )}
             </View>
             
             <TouchableOpacity
               style={[styles.cancelButton, { backgroundColor: isDarkMode ? '#333' : '#f0f0f0' }]}
-              onPress={() => {
-                setMultiMoveModalVisible(false);
-              }}
+              onPress={closeMultiMoveModal}
             >
               <Text style={[styles.cancelButtonText, { color: theme.text.light }]}>Cancel</Text>
             </TouchableOpacity>
